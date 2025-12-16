@@ -31,7 +31,7 @@ public class PrimaryController implements Initializable {
                 Tooltip tooltip = new Tooltip(data.getName() + ": " + (int)data.getPieValue());
                 Tooltip.install(data.getNode(), tooltip);
 
-                 data.getNode().setOnMouseEntered(e -> data.getNode().setScaleX(1.1));
+                data.getNode().setOnMouseEntered(e -> data.getNode().setScaleX(1.1));
                 data.getNode().setOnMouseExited(e -> data.getNode().setScaleX(1.0));
             }
         });
