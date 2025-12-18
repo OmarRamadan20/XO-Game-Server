@@ -17,8 +17,9 @@ import org.apache.derby.jdbc.ClientDriver;
  */
 public class DAO {
 
-    public DAO() {}
-        
+    public DAO() {
+    }
+
     private static Connection connect;
 
     private static void ensureConnection() throws SQLException {
@@ -57,6 +58,11 @@ public class DAO {
         return false;
     }
 
+    public static void updateState(String email, String status) throws SQLException {
+        ensureConnection();
+        PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET state=? where email=?");
+        ps.setString(1,email);
+        ps.setString(2,email);
+         ps.executeUpdate();
+    }
 }
-
-
