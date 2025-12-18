@@ -81,5 +81,16 @@ public class DAO {
          return rs.next();
          
    }
+       public static int getPlayersCountByStatus(String status) throws SQLException {
+        ensureConnection();
+        int count = 0;
+        PreparedStatement ps = connect.prepareStatement("SELECT COUNT(*) FROM TEAM4.USERS WHERE state=?");
+        ps.setString(1, status);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt(1);
+        }
+        return count;
+    }
     
 }
