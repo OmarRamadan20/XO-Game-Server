@@ -6,9 +6,9 @@ package com.mycompany.serverxogame;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.derby.jdbc.ClientDriver;
- 
 
 /**
  *
@@ -17,16 +17,22 @@ import org.apache.derby.jdbc.ClientDriver;
 public class DataAccessObject {
 
     private static Connection connect;
-    
 
-    public DataAccessObject() throws SQLException {
-        try {
+    private static void ensureConnection() throws SQLException {
+        if (connect == null || connect.isClosed()) {
             DriverManager.registerDriver(new ClientDriver());
             connect = DriverManager.getConnection("jdbc:derby://localhost:1527/User", "Team4", "Team4");
-
-        } catch (SQLException ex) {
-            System.getLogger(PrimaryController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
+     public static int inser(User user) throws SQLException {
+        ensureConnection();
+        PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
+        pst.setString(1, user.getName());
+        pst.setString(2, user.getGmail());
+        pst.setString(3, user.getPassword());
+        pst.setInt(4, user.getScore());
+        pst.setString(5, user.getState());
 
+        return pst.executeUpdate();
+    }
 }
