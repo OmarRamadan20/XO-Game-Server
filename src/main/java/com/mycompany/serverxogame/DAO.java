@@ -67,9 +67,19 @@ public class DAO {
 
     public static void updateState(String email, String status) throws SQLException {
         ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET state=? where email=?");
+        PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET state=? WHERE gmail=?");
         ps.setString(1, email);
         ps.setString(2, email);
         ps.executeUpdate();
     }
+   public static boolean isPlayerAlreadyLoggedIn(String gmail) throws SQLException
+   {
+     ensureConnection(); 
+        PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail = ? AND state = 'Online' ");
+        ps.setString(1, gmail);
+         ResultSet rs = ps.executeQuery();
+         return rs.next();
+         
+   }
+    
 }
