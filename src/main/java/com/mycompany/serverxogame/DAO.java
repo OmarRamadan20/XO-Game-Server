@@ -41,28 +41,35 @@ public class DAO {
         return pst.executeUpdate();
     }
 
-    public static boolean login(String email, String password) throws SQLException {
+    public static User login(String email, String password) throws SQLException {
         ensureConnection();
+        User user = null;
 
         PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail = ? AND password = ?");
         try {
             ps.setString(1, email);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
-
-            return rs.next();
-
+            if (rs.next()) {
+            user = new User();
+            user.setName(rs.getString("name"));
+            user.setGmail(rs.getString("gmail"));
+            user.setScore(rs.getInt("score"));
+            user.setState("Online");
+            updateState(email, "Online");
+            }
         } catch (SQLException ex) {
             System.getLogger(DAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        return false;
+        return user;
+       
     }
 
     public static void updateState(String email, String status) throws SQLException {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET state=? where email=?");
-        ps.setString(1,email);
-        ps.setString(2,email);
-         ps.executeUpdate();
+        ps.setString(1, email);
+        ps.setString(2, email);
+        ps.executeUpdate();
     }
 }
