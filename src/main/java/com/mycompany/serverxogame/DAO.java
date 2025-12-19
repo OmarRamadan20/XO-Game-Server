@@ -188,10 +188,10 @@ PreparedStatement ps = connect.prepareStatement(
 
     while (rsGames.next()) {
         Game game = new Game();
-        game.setUser1Id(rsGames.getInt("user1_id"));
-        game.setUser2Id(rsGames.getInt("user2_id"));
-        game.setWinnerId(rsGames.getInt("winner_id"));
-        game.setGameDate(rsGames.getDate("game_date"));
+        game.setUser1_id(rsGames.getInt("user1_id"));
+        game.setUser2_id(rsGames.getInt("user2_id"));
+        game.setWinner_id(rsGames.getInt("winner_id"));
+        game.setGame_date(rsGames.getDate("game_date"));
 
         games.add(game);
     }
