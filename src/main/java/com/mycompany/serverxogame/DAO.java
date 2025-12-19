@@ -96,10 +96,10 @@ public class DAO {
         return count;
     }
 
-    public static void updateScore(int userId, int score) throws SQLException {
+    public static void updateScore(int userId, int score,char operator) throws SQLException {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement(
-                "UPDATE TEAM4.USERS SET score = score + ? WHERE id = ?"
+       "UPDATE TEAM4.USERS SET score = score " + operator + " ? WHERE id = ?"
         );
         ps.setInt(1, score);
         ps.setInt(2, userId);
