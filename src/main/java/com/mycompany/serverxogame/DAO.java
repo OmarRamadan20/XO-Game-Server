@@ -99,13 +99,13 @@ public class DAO {
     public static void updateScore(int userId, int score) throws SQLException {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement(
-                "UPDATE TEAM4.USERS SET score = ? WHERE id = ?"
+                "UPDATE TEAM4.USERS SET score = score + ? WHERE id = ?"
         );
         ps.setInt(1, score);
         ps.setInt(2, userId);
-        ps.executeUpdate();
+        ps.executeUpdate();   
     }
-
+   
     public static ArrayList<User> getTopPlayers() throws SQLException {
         ensureConnection();
         ArrayList<User> topPlayers = new ArrayList<>();
