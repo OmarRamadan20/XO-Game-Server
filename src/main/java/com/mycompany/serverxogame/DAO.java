@@ -157,4 +157,46 @@ PreparedStatement ps = connect.prepareStatement(
       pr.setInt(3,winner_id);
       pr.executeUpdate();      
     }
+   
+   
+   
+   
+   public static ArrayList<Game> getPlayerHistory(String email) throws SQLException {
+    ensureConnection();
+    ArrayList<Game> games = new ArrayList<>();
+
+    
+    PreparedStatement psUser = connect.prepareStatement(
+        "SELECT id FROM TEAM4.USERS WHERE gmail = ?"
+    );
+    psUser.setString(1, email);
+    ResultSet rsUser = psUser.executeQuery();
+
+    if (!rsUser.next()) {
+        return games; 
+    }
+
+    int userId = rsUser.getInt("id");
+
+    PreparedStatement psGames = connect.prepareStatement(
+        "SELECT * FROM TEAM4.GAME WHERE user1_id = ? OR user2_id = ? ORDER BY game_date DESC"
+    );
+    psGames.setInt(1, userId);
+    psGames.setInt(2, userId);
+
+    ResultSet rsGames = psGames.executeQuery();
+
+    while (rsGames.next()) {
+        Game game = new Game();
+        game.setUser1Id(rsGames.getInt("user1_id"));
+        game.setUser2Id(rsGames.getInt("user2_id"));
+        game.setWinnerId(rsGames.getInt("winner_id"));
+        game.setGameDate(rsGames.getDate("game_date"));
+
+        games.add(game);
+    }
+
+    return games;
+}
+
 }
