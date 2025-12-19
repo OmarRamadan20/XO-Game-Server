@@ -71,7 +71,7 @@ public class DAO {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET state=? WHERE gmail=?");
         ps.setString(1, email);
-        ps.setString(2, email);
+        ps.setString(2, status);
         ps.executeUpdate();
     }
 
