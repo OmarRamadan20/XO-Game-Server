@@ -5,6 +5,7 @@
 package com.mycompany.serverxogame;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -52,18 +53,18 @@ public class DAO {
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-            user = new User();
-            user.setName(rs.getString("name"));
-            user.setGmail(rs.getString("gmail"));
-            user.setScore(rs.getInt("score"));
-            user.setState("Online");
-            updateState(email, "Online");
+                user = new User();
+                user.setName(rs.getString("name"));
+                user.setGmail(rs.getString("gmail"));
+                user.setScore(rs.getInt("score"));
+                user.setState("Online");
+                updateState(email, "Online");
             }
         } catch (SQLException ex) {
             System.getLogger(DAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
         return user;
-       
+
     }
 
     public static void updateState(String email, String status) throws SQLException {
@@ -73,16 +74,17 @@ public class DAO {
         ps.setString(2, email);
         ps.executeUpdate();
     }
-   public static boolean isPlayerAlreadyLoggedIn(String gmail) throws SQLException
-   {
-     ensureConnection(); 
+
+    public static boolean isPlayerAlreadyLoggedIn(String gmail) throws SQLException {
+        ensureConnection();
         PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail = ? AND state = 'Online' ");
         ps.setString(1, gmail);
-         ResultSet rs = ps.executeQuery();
-         return rs.next();
-         
-   }
-       public static int getPlayersCountByStatus(String status) throws SQLException {
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+
+    }
+
+    public static int getPlayersCountByStatus(String status) throws SQLException {
         ensureConnection();
         int count = 0;
         PreparedStatement ps = connect.prepareStatement("SELECT COUNT(*) FROM TEAM4.USERS WHERE state=?");
@@ -93,25 +95,32 @@ public class DAO {
         }
         return count;
     }
-       
-     public static ArrayList<User> getTopPlayers() throws SQLException{
-     ensureConnection();
-     ArrayList<User> topPlayers = new ArrayList<>();
-     PreparedStatement ps = connect.prepareStatement(" SELECT name, gmail, score, state FROM TEAM4.USERS ORDER BY score DESC FETCH FIRST 10 ROWS ONLY");
-      ResultSet rs = ps.executeQuery();
-      while (rs.next()) {
-        User user = new User();
-        user.setName(rs.getString("name"));
-        user.setGmail(rs.getString("gmail"));
-        user.setScore(rs.getInt("score"));
-        user.setState(rs.getString("state"));
 
-        topPlayers.add(user);
+    public static ArrayList<User> getTopPlayers() throws SQLException {
+        ensureConnection();
+        ArrayList<User> topPlayers = new ArrayList<>();
+        PreparedStatement ps = connect.prepareStatement(" SELECT name, gmail, score, state FROM TEAM4.USERS ORDER BY score DESC FETCH FIRST 10 ROWS ONLY");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            User user = new User();
+            user.setName(rs.getString("name"));
+            user.setGmail(rs.getString("gmail"));
+            user.setScore(rs.getInt("score"));
+            user.setState(rs.getString("state"));
+
+            topPlayers.add(user);
+        }
+        return topPlayers;
     }
-    return topPlayers;
-     }  
-       
-       
-       
+
     
+   public static void  InsertGameResult(int user1_id, int user2_id,int winner_id,Date game_date) throws SQLException
+    {
+      ensureConnection();
+      PreparedStatement pr  = connect.prepareStatement("INSERT INTO TEAM4.GAME (user1_id, user2_id, winner_id, game_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
+      pr.setInt(1, user1_id);
+      pr.setInt(2, user2_id);
+      pr.setInt(3,winner_id);
+      pr.executeUpdate();      
+    }
 }
