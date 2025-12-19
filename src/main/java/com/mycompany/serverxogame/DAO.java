@@ -188,32 +188,6 @@ public class DAO {
         return games;
     }
 
-    public static User authenticateUser(String gmail, String password) throws SQLException {
-        ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail=? AND password=?");
-        ps.setString(1, gmail);
-        ps.setString(2, password);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new User(
-                    rs.getString("name"),
-                    rs.getString("gmail"),
-                    rs.getString("password"),
-                    rs.getInt("score"),
-                    rs.getString("state")
-            );
-        }
-        return null;
-
-    }
-
-    public static int updateUserScore(String gmail, int scoreAmount) throws SQLException {
-        ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET score=score+? WHERE gamil=?");
-
-        ps.setInt(1, scoreAmount);
-        ps.setString(2, gmail);
-        return ps.executeUpdate();
-    }
+    
 
 }
