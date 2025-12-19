@@ -31,7 +31,7 @@ public class DAO {
         }
     }
 
-    public static int inser(User user) throws SQLException {
+    public static int SignUp(User user) throws SQLException {
         ensureConnection();
         PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
         pst.setString(1, user.getName());
@@ -84,28 +84,44 @@ public class DAO {
 
     }
 
-    public static int getPlayersCountByStatus(String status) throws SQLException {
-        ensureConnection();
-        int count = 0;
-        PreparedStatement ps = connect.prepareStatement("SELECT COUNT(*) FROM TEAM4.USERS WHERE state=?");
-        ps.setString(1, status);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            count = rs.getInt(1);
-        }
-        return count;
+   public static int[] getPlayersStateCounts() throws SQLException {
+    ensureConnection();
+    int[] counts = new int[3]; 
+    
+    PreparedStatement ps = connect.prepareStatement(
+        "SELECT state, COUNT(*) as cnt FROM TEAM4.USERS GROUP BY state"
+    );
+    ResultSet rs = ps.executeQuery();
+    while (rs.next()) {
+        String state = rs.getString("state");
+        int cnt = rs.getInt("cnt");
+       switch (state) {
+    case "OnGame":
+        counts[0] = cnt;
+        break;
+    case "Available":
+        counts[1] = cnt;
+        break;
+    case "Offline":
+        counts[2] = cnt;
+        break;
+}
     }
+    return counts;
+}
 
-    public static void updateScore(int userId, int score) throws SQLException {
+
+
+    public static void updateScore(int userId, int score,char operator) throws SQLException {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement(
-                "UPDATE TEAM4.USERS SET score = ? WHERE id = ?"
+       "UPDATE TEAM4.USERS SET score = score " + operator + " ? WHERE id = ?"
         );
         ps.setInt(1, score);
         ps.setInt(2, userId);
-        ps.executeUpdate();
+        ps.executeUpdate();   
     }
-
+   
     public static ArrayList<User> getTopPlayers() throws SQLException {
         ensureConnection();
         ArrayList<User> topPlayers = new ArrayList<>();
@@ -188,32 +204,6 @@ public class DAO {
         return games;
     }
 
-    public static User authenticateUser(String gmail, String password) throws SQLException {
-        ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail=? AND password=?");
-        ps.setString(1, gmail);
-        ps.setString(2, password);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return new User(
-                    rs.getString("name"),
-                    rs.getString("gmail"),
-                    rs.getString("password"),
-                    rs.getInt("score"),
-                    rs.getString("state")
-            );
-        }
-        return null;
-
-    }
-
-    public static int updateUserScore(String gmail, int scoreAmount) throws SQLException {
-        ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("UPDATE TEAM4.USERS SET score=score+? WHERE gamil=?");
-
-        ps.setInt(1, scoreAmount);
-        ps.setString(2, gmail);
-        return ps.executeUpdate();
-    }
+    
 
 }
