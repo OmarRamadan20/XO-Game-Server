@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import org.apache.derby.jdbc.ClientDriver;
 
 /**
@@ -92,6 +93,23 @@ public class DAO {
         }
         return count;
     }
+       
+     public static ArrayList<User> getTopPlayers() throws SQLException{
+     ensureConnection();
+     ArrayList<User> topPlayers = new ArrayList<>();
+     PreparedStatement ps = connect.prepareStatement(" SELECT name, gmail, score, state FROM TEAM4.USERS ORDER BY score DESC FETCH FIRST 10 ROWS ONLY");
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        User user = new User();
+        user.setName(rs.getString("name"));
+        user.setGmail(rs.getString("gmail"));
+        user.setScore(rs.getInt("score"));
+        user.setState(rs.getString("state"));
+
+        topPlayers.add(user);
+    }
+    return topPlayers;
+     }  
        
        
        
