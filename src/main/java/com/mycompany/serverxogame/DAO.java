@@ -95,6 +95,19 @@ public class DAO {
         }
         return count;
     }
+    
+     public static void updateScore(int userId, int score) throws SQLException {
+    ensureConnection();
+    PreparedStatement ps = connect.prepareStatement(
+        "UPDATE TEAM4.USERS SET score = ? WHERE id = ?"
+    );
+    ps.setInt(1, score);
+    ps.setInt(2, userId);
+    ps.executeUpdate();
+}
+
+    
+    
 
     public static ArrayList<User> getTopPlayers() throws SQLException {
         ensureConnection();
@@ -111,6 +124,27 @@ public class DAO {
             topPlayers.add(user);
         }
         return topPlayers;
+    }
+    
+    
+    
+    public static ArrayList<User> getAvailablePlayers() throws SQLException {
+        ensureConnection();
+        ArrayList<User> availablePlayers = new ArrayList<>();
+PreparedStatement ps = connect.prepareStatement(
+    "SELECT * FROM TEAM4.USERS WHERE state IN ('Online', 'Available') ORDER BY score DESC"
+);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            User user = new User();
+            user.setName(rs.getString("name"));
+            user.setGmail(rs.getString("gmail"));
+            user.setScore(rs.getInt("score"));
+            user.setState(rs.getString("state"));
+
+            availablePlayers.add(user);
+        }
+        return availablePlayers;
     }
 
     
