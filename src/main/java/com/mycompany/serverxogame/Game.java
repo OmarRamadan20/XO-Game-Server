@@ -12,51 +12,65 @@ import java.sql.Date;
  */
 public class Game {
 
-    private int id_Game;
-
-    private int user1_id;
-
-    private int user2_id;
-    private int winner_id;
-    private Date game_date;
+    private int gameId;
+    private int user1Id;
+    private int user2Id;
+    private int winnerId;
+    private Date gameDate;
 
     public Game() {
     }
 
-    public int getGAME_ID() {
-        return id_Game;
+    public Game(int gameId, int user1Id, int user2Id, int winnerId, Date gameDate) {
+        this.gameId = gameId;
+        this.user1Id = user1Id;
+        this.user2Id = user2Id;
+        this.winnerId = winnerId;
+        this.gameDate = gameDate;
     }
 
-    public int getUser1_id() {
-        return user1_id;
+    public int getGameId() {
+        return gameId;
     }
 
-    public void setUser1_id(int user1_id) {
-        this.user1_id = user1_id;
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
     }
 
-    public int getUser2_id() {
-        return user2_id;
+    public int getUser1Id() {
+        return user1Id;
     }
 
-    public void setUser2_id(int user2_id) {
-        this.user2_id = user2_id;
+    public void setUser1Id(int user1Id) {
+        this.user1Id = user1Id;
     }
 
-    public int getWinner_id() {
-        return winner_id;
+    public int getUser2Id() {
+        return user2Id;
     }
 
-    public void setWinner_id(int winner_id) {
-        this.winner_id = winner_id;
+    public void setUser2Id(int user2Id) {
+        this.user2Id = user2Id;
     }
 
-    public Date getGame_date() {
-        return game_date;
+    public int getWinnerId() {
+        return winnerId;
     }
 
-    public void setGame_date(Date game_date) {
-        this.game_date = game_date;
+    public void setWinnerId(int winnerId) {
+        this.winnerId = winnerId;
     }
+
+    public Date getGameDate() {
+        return gameDate;
+    }
+
+    public void setGameDate(Date gameDate) {
+        this.gameDate = gameDate;
+    }
+    
+    
+
+   
 
 }
