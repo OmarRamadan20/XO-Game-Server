@@ -25,7 +25,7 @@ public class DAO {
     private static void ensureConnection() throws SQLException {
         if (connect == null || connect.isClosed()) {
             DriverManager.registerDriver(new ClientDriver());
-            connect = DriverManager.getConnection("jdbc:derby://localhost:1527/User", "Team4", "Team4");
+            connect = DriverManager.getConnection("jdbc:derby://localhost:1527/User", "Team4", "team4");
         }
     }
 
