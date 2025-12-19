@@ -31,7 +31,7 @@ public class DAO {
         }
     }
 
-    public static int inser(User user) throws SQLException {
+    public static int SignUp(User user) throws SQLException {
         ensureConnection();
         PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
         pst.setString(1, user.getName());
@@ -84,17 +84,33 @@ public class DAO {
 
     }
 
-    public static int getPlayersCountByStatus(String status) throws SQLException {
-        ensureConnection();
-        int count = 0;
-        PreparedStatement ps = connect.prepareStatement("SELECT COUNT(*) FROM TEAM4.USERS WHERE state=?");
-        ps.setString(1, status);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            count = rs.getInt(1);
-        }
-        return count;
+   public static int[] getPlayersCounts() throws SQLException {
+    ensureConnection();
+    int[] counts = new int[3]; // [onGame, available, offline]
+    
+    PreparedStatement ps = connect.prepareStatement(
+        "SELECT state, COUNT(*) as cnt FROM TEAM4.USERS GROUP BY state"
+    );
+    ResultSet rs = ps.executeQuery();
+    while (rs.next()) {
+        String state = rs.getString("state");
+        int cnt = rs.getInt("cnt");
+       switch (state) {
+    case "OnGame":
+        counts[0] = cnt;
+        break;
+    case "Available":
+        counts[1] = cnt;
+        break;
+    case "Offline":
+        counts[2] = cnt;
+        break;
+}
     }
+    return counts;
+}
+
+
 
     public static void updateScore(int userId, int score) throws SQLException {
         ensureConnection();
