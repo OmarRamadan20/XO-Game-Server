@@ -84,9 +84,9 @@ public class DAO {
 
     }
 
-   public static int[] getPlayersCounts() throws SQLException {
+   public static int[] getPlayersStateCounts() throws SQLException {
     ensureConnection();
-    int[] counts = new int[3]; // [onGame, available, offline]
+    int[] counts = new int[3]; 
     
     PreparedStatement ps = connect.prepareStatement(
         "SELECT state, COUNT(*) as cnt FROM TEAM4.USERS GROUP BY state"
