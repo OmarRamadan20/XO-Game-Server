@@ -4,7 +4,7 @@
  */
 package com.mycompany.serverxogame;
 
- 
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,9 +22,8 @@ public class  onTurnoff  implements Runnable {
 
     private ServerSocket serverSocket;
     private volatile boolean isOn = true;
-    private final int port = 5555;
-    
-     private static Vector<ClientHandler> clientsVector = new Vector<>();
+    private final int port = 5555
+    public   static Vector<ClientHandler> clientsVector = new Vector<>();
 
     public onTurnoff () {
         try {
