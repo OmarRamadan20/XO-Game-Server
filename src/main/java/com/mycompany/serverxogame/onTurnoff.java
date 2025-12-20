@@ -4,18 +4,12 @@
  */
 package com.mycompany.serverxogame;
 
- 
-import java.io.DataInputStream;
+
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import static java.sql.JDBCType.NULL;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.event.ActionEvent;
  
 
 public class  onTurnoff  implements Runnable {

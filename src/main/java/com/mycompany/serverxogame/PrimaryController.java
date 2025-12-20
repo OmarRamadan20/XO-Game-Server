@@ -49,11 +49,11 @@ public void initialize(URL url, ResourceBundle rb) {
     } catch (SQLException e) {
         e.printStackTrace();
     }
+}
 
     @FXML
     private void onActionBack(ActionEvent event) {
-        NavigationBetweenScreens.backToServer(event);
+            NavigationBetweenScreens.backToServer(event);
     }
-}
 
 }
