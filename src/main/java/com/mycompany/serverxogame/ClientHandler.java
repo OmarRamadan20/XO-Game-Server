@@ -4,28 +4,55 @@
  */
 package com.mycompany.serverxogame;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Vector;
-
 /**
  *
  * @author user
  */
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
 class ClientHandler extends Thread {
 
-    private static Vector<onTurnoff.ClientHandler> clientsVector = new Vector<>();
     private Socket socket;
-   
+    private DataInputStream dis;
+    private PrintStream ps;
 
     ClientHandler(Socket socket) {
         this.socket = socket;
+        try {
+            dis = new DataInputStream(socket.getInputStream());
+            ps = new PrintStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
         try {
-         
+            while (socket != null && !socket.isClosed()) {
+                String msg = dis.readLine();
+                if (msg == null) {
+                    break;
+                }
+
+                JSONObject request = new JSONObject(msg);
+                String type = request.getString("type");
+
+                switch (type) {
+                    case "login":
+                        handleLogin(request);
+                        break;
+                }
+            }
         } catch (Exception e) {
             System.out.println("Client disconnected.");
         } finally {
@@ -33,14 +60,49 @@ class ClientHandler extends Thread {
         }
     }
 
+    private void handleLogin(JSONObject request) {
+        String gmail = request.getString("gmail");
+        String pass = request.getString("password");
+
+        try {
+            User userLogin = DAO.login(gmail, pass);
+
+            JSONObject response = new JSONObject();
+            response.put("type", "login_response");
+
+            if (userLogin != null) {
+                response.put("status", "success");
+
+                response.put("name", userLogin.getName());
+                response.put("gmail", userLogin.getGmail());
+                response.put("score", userLogin.getScore());
+
+            } else {
+                response.put("status", "fail");
+                response.put("message", "Invalid email or password");
+            }
+
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void closeConnection() {
         try {
+            if (dis != null) {
+                dis.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
             if (socket != null) {
                 socket.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientsVector.remove(this);
+        onTurnoff.clientsVector.remove(this);
     }
 }

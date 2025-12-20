@@ -18,7 +18,7 @@ public class  onTurnoff  implements Runnable {
     private volatile boolean isOn = true;
     private final int port = 5555;
     
-     private static Vector<ClientHandler> clientsVector = new Vector<>();
+    public   static Vector<ClientHandler> clientsVector = new Vector<>();
 
     public onTurnoff () {
         try {
