@@ -54,14 +54,14 @@ class ClientHandler extends Thread {
                     case "signup":
                         handleSignUp(request);
                         break;
-<<<<<<< HEAD
+
                     case "update_score":
                         handleScore(request);
                         break;
 
                     case "game_result":
                         handleInsertGameResult(request);
-=======
+
                     case "getTopPlayers":
                         handleGetTopPlayer();
                         break;
@@ -70,7 +70,7 @@ class ClientHandler extends Thread {
                         break;
                     case "playerHistory":
                         handlePlayerHistory(request);
->>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
+
                         break;
                 }
             }
@@ -124,11 +124,7 @@ class ClientHandler extends Thread {
             JSONObject response = new JSONObject();
             response.put("type", "signUp_response");
             if (result > 0) {
-<<<<<<< HEAD
-                response.put("status", "success");
-            } else {
-=======
->>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
+
                 response.put("status", "success");
             } else {
                 response.put("status", "fail");
@@ -141,7 +137,7 @@ class ClientHandler extends Thread {
 
     }
 
-<<<<<<< HEAD
+
     private void handleScore(JSONObject request) {
         try {
             int userId = request.getInt("userId");
@@ -191,8 +187,7 @@ class ClientHandler extends Thread {
 }
 
     
-    
-=======
+   
     private void handleGetTopPlayer() {
         try {
             ArrayList<User> players = DAO.getTopPlayers();
@@ -264,7 +259,7 @@ class ClientHandler extends Thread {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
->>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
+
 
     public void closeConnection() {
         try {
