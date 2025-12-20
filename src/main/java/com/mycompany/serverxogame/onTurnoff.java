@@ -68,33 +68,4 @@ public class  onTurnoff  implements Runnable {
         }
     }
 
-    // Inner class to handle individual client communication
-    class ClientHandler extends Thread {
-        private Socket socket;
-        // Add DataInputStream and PrintStream here
-
-        ClientHandler(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // Logic for reading/writing moves goes here
-            } catch (Exception e) {
-                System.out.println("Client disconnected.");
-            } finally {
-                closeConnection();
-            }
-        }
-
-        public void closeConnection() {
-            try {
-                if (socket != null) socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            clientsVector.remove(this);
-        }
-    }
 }
