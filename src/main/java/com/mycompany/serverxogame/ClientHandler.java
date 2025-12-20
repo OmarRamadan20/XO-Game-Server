@@ -51,6 +51,9 @@ class ClientHandler extends Thread {
                     case "signup":
                         handleSignUp(request);
                         break;
+                    case "update_score":
+                        handleScore(request);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -98,23 +101,47 @@ class ClientHandler extends Thread {
             user.setScore(0);
             user.setState("offline");
             int result = DAO.SignUp(user);
-            JSONObject response=new JSONObject();
+            JSONObject response = new JSONObject();
             response.put("type", "signUp_response");
-            if(result>0)
-            {
+            if (result > 0) {
                 response.put("status", "success");
-            }else
-            {
+            } else {
                 response.put("status", "success");
             }
-             ps.println(response.toString());
-            
+            ps.println(response.toString());
+
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        
 
     }
+    
+    
+    
+    private void handleScore(JSONObject request) {
+    try {
+        int userId = request.getInt("userId");
+        int score = request.getInt("score");
+        char operator = request.getString("operator").charAt(0);
+
+        DAO.updateScore(userId, score, operator);
+
+        JSONObject response = new JSONObject();
+        response.put("type", "update_score_response");
+        response.put("status", "success");
+
+        ps.println(response.toString());
+
+    } catch (SQLException e) {
+        JSONObject response = new JSONObject();
+        response.put("type", "update_score_response");
+        response.put("status", "fail");
+        response.put("message", e.getMessage());
+
+        ps.println(response.toString());
+    }
+}
+
 
     public void closeConnection() {
         try {
