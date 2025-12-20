@@ -21,6 +21,7 @@ class ClientHandler extends Thread {
     private Socket socket;
     private DataInputStream dis;
     private PrintStream ps;
+    private User loggedUser;
 
     ClientHandler(Socket socket) {
         this.socket = socket;
@@ -76,10 +77,12 @@ class ClientHandler extends Thread {
                 response.put("name", userLogin.getName());
                 response.put("gmail", userLogin.getGmail());
                 response.put("score", userLogin.getScore());
+                this.loggedUser = userLogin;
 
             } else {
                 response.put("status", "fail");
                 response.put("message", "Invalid email or password");
+                this.loggedUser = null;
             }
 
             ps.println(response.toString());
@@ -105,7 +108,7 @@ class ClientHandler extends Thread {
                 response.put("status", "success");
             }else
             {
-                response.put("status", "success");
+                response.put("status", "fail");
             }
              ps.println(response.toString());
             
@@ -132,4 +135,14 @@ class ClientHandler extends Thread {
         }
         onTurnoff.clientsVector.remove(this);
     }
+    
+    
+    private boolean isPlayerAlreadyLoggedIn(String gmail) {
+    for (ClientHandler client : onTurnoff.clientsVector) {
+        if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
+            return true;
+        }
+    }
+    return false;
+}
 }
