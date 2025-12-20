@@ -9,15 +9,19 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+
 import javafx.scene.control.Button;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * FXML Controller class
  *
- * @author Aladawy
+ * @author user
  */
 public class Server_runController implements Initializable {
 
+    private onTurnoff serverTask;
+    private Thread serverThread;
     @FXML
     private Button ServerStateButton;
     @FXML
@@ -29,15 +33,23 @@ public class Server_runController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
+    }
 
     @FXML
     private void runTheServer(ActionEvent event) {
-       new  onTurnoff();
+        if (serverTask == null || !serverThread.isAlive()) {
+            serverTask = new onTurnoff();
+            serverThread = new Thread(serverTask);
+            serverThread.start();
+            System.out.println("Server Started!");
+        } else {
+            System.out.println("Server is already running!");
+        }
     }
 
     @FXML
     private void showPlayerStatus(ActionEvent event) {
+        NavigationBetweenScreens.goToPieChart(event);
     }
-    
+
 }
