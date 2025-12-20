@@ -3,21 +3,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.serverxogame;
-
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Vector;
- 
+
 
 public class  onTurnoff  implements Runnable {
 
     private ServerSocket serverSocket;
     private volatile boolean isOn = true;
     private final int port = 5555;
-    
     public   static Vector<ClientHandler> clientsVector = new Vector<>();
 
     public onTurnoff () {

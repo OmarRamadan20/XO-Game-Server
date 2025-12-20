@@ -9,12 +9,9 @@ package com.mycompany.serverxogame;
  * @author user
  */
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import org.json.JSONObject;
-
-import java.io.IOException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -50,6 +47,9 @@ class ClientHandler extends Thread {
                 switch (type) {
                     case "login":
                         handleLogin(request);
+                        break;
+                    case "signup":
+                        handleSignUp(request);
                         break;
                 }
             }
@@ -87,6 +87,33 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void handleSignUp(JSONObject request) {
+        try {
+            User user = new User();
+            user.setName(request.getString("name"));
+            user.setGmail(request.getString("gmail"));
+            user.setPassword(request.getString("password"));
+            user.setScore(0);
+            user.setState("offline");
+            int result = DAO.SignUp(user);
+            JSONObject response=new JSONObject();
+            response.put("type", "signUp_response");
+            if(result>0)
+            {
+                response.put("status", "success");
+            }else
+            {
+                response.put("status", "success");
+            }
+             ps.println(response.toString());
+            
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        
+
     }
 
     public void closeConnection() {
