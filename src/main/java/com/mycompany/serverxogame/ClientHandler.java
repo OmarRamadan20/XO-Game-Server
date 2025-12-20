@@ -54,6 +54,10 @@ class ClientHandler extends Thread {
                     case "update_score":
                         handleScore(request);
                         break;
+
+                    case "game_result":
+                        handleInsertGameResult(request);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -115,26 +119,48 @@ class ClientHandler extends Thread {
         }
 
     }
-    
-    
-    
-    private void handleScore(JSONObject request) {
-    try {
-        int userId = request.getInt("userId");
-        int score = request.getInt("score");
-        char operator = request.getString("operator").charAt(0);
 
-        DAO.updateScore(userId, score, operator);
+    private void handleScore(JSONObject request) {
+        try {
+            int userId = request.getInt("userId");
+            int score = request.getInt("score");
+            char operator = request.getString("operator").charAt(0);
+
+            DAO.updateScore(userId, score, operator);
+
+            JSONObject response = new JSONObject();
+            response.put("type", "update_score_response");
+            response.put("status", "success");
+
+            ps.println(response.toString());
+
+        } catch (SQLException e) {
+            JSONObject response = new JSONObject();
+            response.put("type", "update_score_response");
+            response.put("status", "fail");
+            response.put("message", e.getMessage());
+
+            ps.println(response.toString());
+        }
+    }
+    
+    private void handleInsertGameResult(JSONObject request) {
+    try {
+        int user1Id = request.getInt("user1_id");
+        int user2Id = request.getInt("user2_id");
+        int winnerId = request.getInt("winner_id");
+
+        DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
 
         JSONObject response = new JSONObject();
-        response.put("type", "update_score_response");
+        response.put("type", "game_result_response");
         response.put("status", "success");
 
         ps.println(response.toString());
 
-    } catch (SQLException e) {
+    } catch (Exception e) {
         JSONObject response = new JSONObject();
-        response.put("type", "update_score_response");
+        response.put("type", "game_result_response");
         response.put("status", "fail");
         response.put("message", e.getMessage());
 
@@ -142,6 +168,8 @@ class ClientHandler extends Thread {
     }
 }
 
+    
+    
 
     public void closeConnection() {
         try {
