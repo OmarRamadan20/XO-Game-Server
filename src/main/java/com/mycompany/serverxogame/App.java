@@ -33,6 +33,7 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
+        new onTurnoff();
         System.out.println("pull request testing.. ..");
     }
 

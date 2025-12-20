@@ -33,6 +33,7 @@ public class Server_runController implements Initializable {
 
     @FXML
     private void runTheServer(ActionEvent event) {
+       new  onTurnoff();
     }
 
     @FXML
