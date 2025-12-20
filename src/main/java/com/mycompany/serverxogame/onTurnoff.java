@@ -3,26 +3,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.serverxogame;
-
-
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import static java.sql.JDBCType.NULL;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.event.ActionEvent;
- 
+
 
 public class  onTurnoff  implements Runnable {
 
     private ServerSocket serverSocket;
     private volatile boolean isOn = true;
-    private final int port = 5555
+    private final int port = 5555;
     public   static Vector<ClientHandler> clientsVector = new Vector<>();
 
     public onTurnoff () {
@@ -76,33 +68,4 @@ public class  onTurnoff  implements Runnable {
         }
     }
 
-    // Inner class to handle individual client communication
-    class ClientHandler extends Thread {
-        private Socket socket;
-        // Add DataInputStream and PrintStream here
-
-        ClientHandler(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // Logic for reading/writing moves goes here
-            } catch (Exception e) {
-                System.out.println("Client disconnected.");
-            } finally {
-                closeConnection();
-            }
-        }
-
-        public void closeConnection() {
-            try {
-                if (socket != null) socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            clientsVector.remove(this);
-        }
-    }
 }
