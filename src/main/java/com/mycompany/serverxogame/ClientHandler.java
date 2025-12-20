@@ -57,6 +57,9 @@ class ClientHandler extends Thread {
                     case "getTopPlayers":
                         handleGetTopPlayer();
                         break;
+                     case "getAvailablePlayers":
+                        handleGetAvailablePlayers();
+                        break;    
                 }
             }
         } catch (Exception e) {
@@ -144,6 +147,30 @@ class ClientHandler extends Thread {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
 
+    }
+        private void handleGetAvailablePlayers()
+    {
+        try {
+            ArrayList<User> players = DAO.getAvailablePlayers();
+            JSONObject response = new JSONObject();
+            response.put("type", "getAvailablePlayers");
+            JSONArray arrOfPlayers = new JSONArray();
+            for (User user : players) {
+                JSONObject obj = new JSONObject();
+                obj.put("name", user.getName());
+                obj.put("gmail", user.getGmail());
+                obj.put("score", user.getScore());
+                obj.put("state", user.getState());
+                arrOfPlayers.put(obj);
+
+            }
+            response.put("players", arrOfPlayers);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        
     }
 
     public void closeConnection() {
