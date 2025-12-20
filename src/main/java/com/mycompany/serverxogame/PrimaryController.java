@@ -4,15 +4,19 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 
 public class PrimaryController implements Initializable {
 
     @FXML
     private PieChart pieChart;
+    @FXML
+    private Button btnBack;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -35,5 +39,10 @@ public class PrimaryController implements Initializable {
                 data.getNode().setOnMouseExited(e -> data.getNode().setScaleX(1.0));
             }
         });
+    }
+
+    @FXML
+    private void onActionBack(ActionEvent event) {
+        NavigationBetweenScreens.backToServer(event);
     }
 }
