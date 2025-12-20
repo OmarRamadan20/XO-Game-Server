@@ -66,8 +66,7 @@ public class  onTurnoff  implements Runnable {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
-            // Close all client connections
-            for (ClientHandler client : clientsVector) {
+             for (ClientHandler client : clientsVector) {
                 client.closeConnection();
             }
             clientsVector.clear();
@@ -77,11 +76,9 @@ public class  onTurnoff  implements Runnable {
         }
     }
 
-    // Inner class to handle individual client communication
-    class ClientHandler extends Thread {
+     class ClientHandler extends Thread {
         private Socket socket;
-        // Add DataInputStream and PrintStream here
-
+ 
         ClientHandler(Socket socket) {
             this.socket = socket;
         }
@@ -89,8 +86,7 @@ public class  onTurnoff  implements Runnable {
         @Override
         public void run() {
             try {
-                // Logic for reading/writing moves goes here
-            } catch (Exception e) {
+             } catch (Exception e) {
                 System.out.println("Client disconnected.");
             } finally {
                 closeConnection();
