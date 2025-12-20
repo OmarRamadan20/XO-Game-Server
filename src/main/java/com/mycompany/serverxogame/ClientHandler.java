@@ -15,6 +15,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import org.json.JSONArray;
 
 class ClientHandler extends Thread {
 
@@ -50,6 +52,9 @@ class ClientHandler extends Thread {
                         break;
                     case "signup":
                         handleSignUp(request);
+                        break;
+                    case "getTopPlayers":
+                        handleGetTopPlayer();
                         break;
                 }
             }
@@ -98,21 +103,42 @@ class ClientHandler extends Thread {
             user.setScore(0);
             user.setState("offline");
             int result = DAO.SignUp(user);
-            JSONObject response=new JSONObject();
+            JSONObject response = new JSONObject();
             response.put("type", "signUp_response");
-            if(result>0)
-            {
+            if (result > 0) {
                 response.put("status", "success");
-            }else
-            {
+            } else {
                 response.put("status", "success");
             }
-             ps.println(response.toString());
-            
+            ps.println(response.toString());
+
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        
+
+    }
+
+    private void handleGetTopPlayer() {
+        try {
+            ArrayList<User> players = DAO.getTopPlayers();
+            JSONObject response = new JSONObject();
+            response.put("type", "getTopPlayers");
+            JSONArray arrOfPlayers = new JSONArray();
+            for (User user : players) {
+                JSONObject obj = new JSONObject();
+                obj.put("name", user.getName());
+                obj.put("gmail", user.getGmail());
+                obj.put("score", user.getScore());
+                obj.put("state", user.getState());
+                arrOfPlayers.put(obj);
+
+            }
+            response.put("players", arrOfPlayers);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
 
     }
 
