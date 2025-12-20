@@ -57,9 +57,12 @@ class ClientHandler extends Thread {
                     case "getTopPlayers":
                         handleGetTopPlayer();
                         break;
-                     case "getAvailablePlayers":
+                    case "getAvailablePlayers":
                         handleGetAvailablePlayers();
-                        break;    
+                        break;
+                    case "playerHistory":
+                        handlePlayerHistory(request);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -113,10 +116,9 @@ class ClientHandler extends Thread {
             response.put("type", "signUp_response");
             if (result > 0) {
                 response.put("status", "success");
-            }else
-            {
+            } else {
                 response.put("status", "fail");
-            } 
+            }
             ps.println(response.toString());
 
         } catch (SQLException ex) {
@@ -148,8 +150,8 @@ class ClientHandler extends Thread {
         }
 
     }
-        private void handleGetAvailablePlayers()
-    {
+
+    private void handleGetAvailablePlayers() {
         try {
             ArrayList<User> players = DAO.getAvailablePlayers();
             JSONObject response = new JSONObject();
@@ -170,7 +172,31 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        
+
+    }
+
+    private void handlePlayerHistory(JSONObject request) {
+        try {
+            String gmail = request.getString("gmail");
+            ArrayList<Game> games = DAO.getPlayerHistory(gmail);
+            JSONObject response = new JSONObject();
+            response.put("type", "playerHistory");
+            JSONArray arrPlayerHistory = new JSONArray();
+            for (Game game : games) {
+                JSONObject obj = new JSONObject();
+                obj.put("user1", game.getUser1Id());
+                obj.put("user2", game.getUser1Id());
+                obj.put("winner", game.getWinnerId());
+                obj.put("date", game.getGameDate().toString());
+                arrPlayerHistory.put(obj);
+
+            }
+            response.put("games", arrPlayerHistory);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
     }
 
     public void closeConnection() {
@@ -189,19 +215,16 @@ class ClientHandler extends Thread {
         }
         onTurnoff.clientsVector.remove(this);
     }
-    
-    
-  
-    
+
     private boolean isPlayerAlreadyLoggedIn(String gmail) {
-    for (ClientHandler client : onTurnoff.clientsVector) {
-        if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
-            return true;
+        for (ClientHandler client : onTurnoff.clientsVector) {
+            if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
+                return true;
+            }
         }
-    }
         return false;
     }
-    
+
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
