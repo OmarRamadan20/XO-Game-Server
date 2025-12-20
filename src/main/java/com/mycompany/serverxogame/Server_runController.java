@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
+
 /**
  * FXML Controller class
  *
@@ -19,21 +20,31 @@ import javafx.scene.layout.AnchorPane;
  */
 public class Server_runController implements Initializable {
 
-
+    private onTurnoff serverTask;
+    private Thread serverThread;
     @FXML
     private Button ServerStateButton;
     @FXML
     private Button PlayerStatusButton;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
-    
+    }
+
     @FXML
     private void runTheServer(ActionEvent event) {
+        if (serverTask == null || !serverThread.isAlive()) {
+            serverTask = new onTurnoff();
+            serverThread = new Thread(serverTask);
+            serverThread.start();
+            System.out.println("Server Started!");
+        } else {
+            System.out.println("Server is already running!");
+        }
     }
 
     @FXML
