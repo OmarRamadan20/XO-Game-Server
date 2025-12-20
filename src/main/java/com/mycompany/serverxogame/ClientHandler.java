@@ -15,12 +15,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import org.json.JSONArray;
 
 class ClientHandler extends Thread {
 
     private Socket socket;
     private DataInputStream dis;
     private PrintStream ps;
+    private User loggedUser;
 
     ClientHandler(Socket socket) {
         this.socket = socket;
@@ -51,12 +54,23 @@ class ClientHandler extends Thread {
                     case "signup":
                         handleSignUp(request);
                         break;
+<<<<<<< HEAD
                     case "update_score":
                         handleScore(request);
                         break;
 
                     case "game_result":
                         handleInsertGameResult(request);
+=======
+                    case "getTopPlayers":
+                        handleGetTopPlayer();
+                        break;
+                    case "getAvailablePlayers":
+                        handleGetAvailablePlayers();
+                        break;
+                    case "playerHistory":
+                        handlePlayerHistory(request);
+>>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
                         break;
                 }
             }
@@ -83,10 +97,12 @@ class ClientHandler extends Thread {
                 response.put("name", userLogin.getName());
                 response.put("gmail", userLogin.getGmail());
                 response.put("score", userLogin.getScore());
+                this.loggedUser = userLogin;
 
             } else {
                 response.put("status", "fail");
                 response.put("message", "Invalid email or password");
+                this.loggedUser = null;
             }
 
             ps.println(response.toString());
@@ -108,9 +124,14 @@ class ClientHandler extends Thread {
             JSONObject response = new JSONObject();
             response.put("type", "signUp_response");
             if (result > 0) {
+<<<<<<< HEAD
                 response.put("status", "success");
             } else {
+=======
+>>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
                 response.put("status", "success");
+            } else {
+                response.put("status", "fail");
             }
             ps.println(response.toString());
 
@@ -120,6 +141,7 @@ class ClientHandler extends Thread {
 
     }
 
+<<<<<<< HEAD
     private void handleScore(JSONObject request) {
         try {
             int userId = request.getInt("userId");
@@ -170,6 +192,79 @@ class ClientHandler extends Thread {
 
     
     
+=======
+    private void handleGetTopPlayer() {
+        try {
+            ArrayList<User> players = DAO.getTopPlayers();
+            JSONObject response = new JSONObject();
+            response.put("type", "getTopPlayers");
+            JSONArray arrOfPlayers = new JSONArray();
+            for (User user : players) {
+                JSONObject obj = new JSONObject();
+                obj.put("name", user.getName());
+                obj.put("gmail", user.getGmail());
+                obj.put("score", user.getScore());
+                obj.put("state", user.getState());
+                arrOfPlayers.put(obj);
+
+            }
+            response.put("players", arrOfPlayers);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+
+    }
+
+    private void handleGetAvailablePlayers() {
+        try {
+            ArrayList<User> players = DAO.getAvailablePlayers();
+            JSONObject response = new JSONObject();
+            response.put("type", "getAvailablePlayers");
+            JSONArray arrOfPlayers = new JSONArray();
+            for (User user : players) {
+                JSONObject obj = new JSONObject();
+                obj.put("name", user.getName());
+                obj.put("gmail", user.getGmail());
+                obj.put("score", user.getScore());
+                obj.put("state", user.getState());
+                arrOfPlayers.put(obj);
+
+            }
+            response.put("players", arrOfPlayers);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+
+    }
+
+    private void handlePlayerHistory(JSONObject request) {
+        try {
+            String gmail = request.getString("gmail");
+            ArrayList<Game> games = DAO.getPlayerHistory(gmail);
+            JSONObject response = new JSONObject();
+            response.put("type", "playerHistory");
+            JSONArray arrPlayerHistory = new JSONArray();
+            for (Game game : games) {
+                JSONObject obj = new JSONObject();
+                obj.put("user1", game.getUser1Id());
+                obj.put("user2", game.getUser1Id());
+                obj.put("winner", game.getWinnerId());
+                obj.put("date", game.getGameDate().toString());
+                arrPlayerHistory.put(obj);
+
+            }
+            response.put("games", arrPlayerHistory);
+            ps.println(response.toString());
+
+        } catch (SQLException ex) {
+            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+    }
+>>>>>>> 4baeb62303e28f59f8b1ad4b8c79a7545ff51c06
 
     public void closeConnection() {
         try {
@@ -186,5 +281,18 @@ class ClientHandler extends Thread {
             e.printStackTrace();
         }
         onTurnoff.clientsVector.remove(this);
+    }
+
+    private boolean isPlayerAlreadyLoggedIn(String gmail) {
+        for (ClientHandler client : onTurnoff.clientsVector) {
+            if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void updateState(String email, String status) throws SQLException {
+        DAO.updateState(email, status);
     }
 }

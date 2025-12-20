@@ -67,5 +67,5 @@ public class  onTurnoff  implements Runnable {
                 ex.printStackTrace();
         }
     }
- 
+
 }
