@@ -30,7 +30,7 @@ public class DAO {
             connect = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM4", "Team4", "team4");
         }
     }
-
+    
     public static int SignUp(User user) throws SQLException {
         ensureConnection();
         PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
@@ -57,8 +57,8 @@ public class DAO {
                 user.setName(rs.getString("name"));
                 user.setGmail(rs.getString("gmail"));
                 user.setScore(rs.getInt("score"));
-                user.setState("Online");
-                updateState(email, "Online");
+                user.setState("onlineAvailable");
+                updateState(email, "onlineAvailable");
             }
         } catch (SQLException ex) {
             System.getLogger(DAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -143,7 +143,7 @@ public class DAO {
         ensureConnection();
         ArrayList<User> availablePlayers = new ArrayList<>();
         PreparedStatement ps = connect.prepareStatement(
-                "SELECT * FROM TEAM4.USERS WHERE state IN ('Online', 'Available') ORDER BY score DESC"
+                "SELECT * FROM TEAM4.USERS WHERE state IN ('onlineAvailable') ORDER BY score DESC"
         );
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
