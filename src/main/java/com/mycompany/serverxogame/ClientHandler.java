@@ -61,7 +61,7 @@ class ClientHandler extends Thread {
 
                     case "game_result":
                         handleInsertGameResult(request);
-
+                        break;
                     case "getTopPlayers":
                         handleGetTopPlayer();
                         break;
