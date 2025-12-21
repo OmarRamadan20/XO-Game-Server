@@ -70,7 +70,6 @@ class ClientHandler extends Thread {
                         break;
                     case "playerHistory":
                         handlePlayerHistory(request);
-
                         break;
                 }
             }
@@ -89,7 +88,7 @@ class ClientHandler extends Thread {
             User userLogin = DAO.login(gmail, pass);
 
             JSONObject response = new JSONObject();
-            response.put("type", "login_response");
+            response.put("type", "login");
 
             if (userLogin != null) {
                 response.put("status", "success");
@@ -122,7 +121,7 @@ class ClientHandler extends Thread {
             user.setState("offline");
             int result = DAO.SignUp(user);
             JSONObject response = new JSONObject();
-            response.put("type", "signUp_response");
+            response.put("type", "signup");
             if (result > 0) {
 
                 response.put("status", "success");
@@ -147,14 +146,14 @@ class ClientHandler extends Thread {
             DAO.updateScore(userId, score, operator);
 
             JSONObject response = new JSONObject();
-            response.put("type", "update_score_response");
+            response.put("type", "update_score");
             response.put("status", "success");
 
             ps.println(response.toString());
 
         } catch (SQLException e) {
             JSONObject response = new JSONObject();
-            response.put("type", "update_score_response");
+            response.put("type", "update_score");
             response.put("status", "fail");
             response.put("message", e.getMessage());
 
@@ -171,14 +170,14 @@ class ClientHandler extends Thread {
         DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
 
         JSONObject response = new JSONObject();
-        response.put("type", "game_result_response");
+        response.put("type", "game_result");
         response.put("status", "success");
 
         ps.println(response.toString());
 
     } catch (Exception e) {
         JSONObject response = new JSONObject();
-        response.put("type", "game_result_response");
+        response.put("type", "game_result");
         response.put("status", "fail");
         response.put("message", e.getMessage());
 
