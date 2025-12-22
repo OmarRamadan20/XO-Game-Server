@@ -30,7 +30,7 @@ public class DAO {
             connect = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM4", "Team4", "team4");
         }
     }
-
+    
     public static int SignUp(User user) throws SQLException {
         ensureConnection();
         PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
@@ -39,6 +39,7 @@ public class DAO {
         pst.setString(3, user.getPassword());
         pst.setInt(4, user.getScore());
         pst.setString(5, user.getState());
+        updateState(user.getGmail(), "onlineAvailable");
 
         return pst.executeUpdate();
     }
@@ -57,8 +58,8 @@ public class DAO {
                 user.setName(rs.getString("name"));
                 user.setGmail(rs.getString("gmail"));
                 user.setScore(rs.getInt("score"));
-                user.setState("Online");
-                updateState(email, "Online");
+                user.setState("onlineAvailable");
+                updateState(email, "onlineAvailable");
             }
         } catch (SQLException ex) {
             System.getLogger(DAO.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -96,10 +97,10 @@ public class DAO {
         String state = rs.getString("state");
         int cnt = rs.getInt("cnt");
        switch (state) {
-    case "OnGame":
+    case "onlineGame":
         counts[0] = cnt;
         break;
-    case "Available":
+    case "onlineAvailable":
         counts[1] = cnt;
         break;
     case "Offline":
@@ -143,7 +144,7 @@ public class DAO {
         ensureConnection();
         ArrayList<User> availablePlayers = new ArrayList<>();
         PreparedStatement ps = connect.prepareStatement(
-                "SELECT * FROM TEAM4.USERS WHERE state IN ('Online', 'Available') ORDER BY score DESC"
+                "SELECT * FROM TEAM4.USERS WHERE state IN ('onlineAvailable') ORDER BY score DESC"
         );
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -157,8 +158,7 @@ public class DAO {
         }
         return availablePlayers;
     }
-//response
-    public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
+     public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
         ensureConnection();
         PreparedStatement pr = connect.prepareStatement("INSERT INTO TEAM4.GAME (user1_id, user2_id, winner_id, game_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
         pr.setInt(1, user1_id);
