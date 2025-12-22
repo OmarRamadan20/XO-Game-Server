@@ -112,6 +112,8 @@ class ClientHandler extends Thread {
     }
 
     private void handleSignUp(JSONObject request) {
+        JSONObject response = new JSONObject();
+        response.put("type", "signup");
         try {
             User user = new User();
             user.setName(request.getString("name"));
@@ -120,22 +122,24 @@ class ClientHandler extends Thread {
             user.setScore(0);
             user.setState("offline");
             int result = DAO.SignUp(user);
-            JSONObject response = new JSONObject();
-            response.put("type", "signup");
+
             if (result > 0) {
 
                 response.put("status", "success");
             } else {
                 response.put("status", "fail");
             }
-            ps.println(response.toString());
-
+        } catch (java.sql.SQLIntegrityConstraintViolationException ex) {
+   
+            response.put("status", "fail");
+            response.put("message", "This Email is already registered!");
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } finally {
+            ps.println(response.toString());
         }
 
     }
-
 
     private void handleScore(JSONObject request) {
         try {
@@ -160,33 +164,31 @@ class ClientHandler extends Thread {
             ps.println(response.toString());
         }
     }
-    
+
     private void handleInsertGameResult(JSONObject request) {
-    try {
-        int user1Id = request.getInt("user1_id");
-        int user2Id = request.getInt("user2_id");
-        int winnerId = request.getInt("winner_id");
+        try {
+            int user1Id = request.getInt("user1_id");
+            int user2Id = request.getInt("user2_id");
+            int winnerId = request.getInt("winner_id");
 
-        DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
+            DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
 
-        JSONObject response = new JSONObject();
-        response.put("type", "game_result");
-        response.put("status", "success");
+            JSONObject response = new JSONObject();
+            response.put("type", "game_result");
+            response.put("status", "success");
 
-        ps.println(response.toString());
+            ps.println(response.toString());
 
-    } catch (Exception e) {
-        JSONObject response = new JSONObject();
-        response.put("type", "game_result");
-        response.put("status", "fail");
-        response.put("message", e.getMessage());
+        } catch (Exception e) {
+            JSONObject response = new JSONObject();
+            response.put("type", "game_result");
+            response.put("status", "fail");
+            response.put("message", e.getMessage());
 
-        ps.println(response.toString());
+            ps.println(response.toString());
+        }
     }
-}
 
-    
-   
     private void handleGetTopPlayer() {
         try {
             ArrayList<User> players = DAO.getTopPlayers();
@@ -257,8 +259,9 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-    }
+        // هذا الجزء سيعمل عندما يكون الإيميل مكرراً
 
+    }
 
     public void closeConnection() {
         try {
