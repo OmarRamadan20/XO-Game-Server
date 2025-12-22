@@ -72,6 +72,9 @@ class ClientHandler extends Thread {
                     case "playerHistory":
                         handlePlayerHistory(request);
                         break;
+                    case "logout":
+                        handleLogout(request);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -298,4 +301,26 @@ class ClientHandler extends Thread {
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
+    
+    private void handleLogout(JSONObject request) {
+        try {
+            String gmail = request.getString("gmail");
+
+            DAO.updateState(gmail, "Offline");
+            this.loggedUser = null;
+
+            JSONObject response = new JSONObject();
+            response.put("type", "logout_response");
+            response.put("status", "success");
+
+            ps.println(response.toString());
+
+        } catch (Exception e) {
+            JSONObject response = new JSONObject();
+            response.put("type", "logout_response");
+            response.put("status", "fail");
+            ps.println(response.toString());
+        }
+    }
+
 }
