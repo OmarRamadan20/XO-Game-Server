@@ -96,10 +96,10 @@ public class DAO {
         String state = rs.getString("state");
         int cnt = rs.getInt("cnt");
        switch (state) {
-    case "OnGame":
+    case "onlineGame":
         counts[0] = cnt;
         break;
-    case "Available":
+    case "onlineAvailable":
         counts[1] = cnt;
         break;
     case "Offline":
@@ -157,8 +157,7 @@ public class DAO {
         }
         return availablePlayers;
     }
-//response
-    public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
+     public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
         ensureConnection();
         PreparedStatement pr = connect.prepareStatement("INSERT INTO TEAM4.GAME (user1_id, user2_id, winner_id, game_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
         pr.setInt(1, user1_id);
