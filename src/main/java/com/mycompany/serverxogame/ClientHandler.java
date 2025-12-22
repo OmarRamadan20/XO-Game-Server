@@ -124,7 +124,7 @@ class ClientHandler extends Thread {
             user.setGmail(request.getString("gmail"));
             user.setPassword(request.getString("password"));
             user.setScore(0);
-            user.setState("offline");
+            user.setState("onlineAvailable");
             int result = DAO.SignUp(user);
 
             if (result > 0) {
