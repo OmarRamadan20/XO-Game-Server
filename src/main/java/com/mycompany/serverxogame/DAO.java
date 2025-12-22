@@ -39,6 +39,7 @@ public class DAO {
         pst.setString(3, user.getPassword());
         pst.setInt(4, user.getScore());
         pst.setString(5, user.getState());
+        updateState(user.getGmail(), "onlineAvailable");
 
         return pst.executeUpdate();
     }
