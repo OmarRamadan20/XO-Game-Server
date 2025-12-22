@@ -71,7 +71,9 @@ class ClientHandler extends Thread {
                         break;
                     case "playerHistory":
                         handlePlayerHistory(request);
-
+                        break;
+                    case "logout":
+                        handleLogout(request);
                         break;
                 }
             }
@@ -90,7 +92,7 @@ class ClientHandler extends Thread {
             User userLogin = DAO.login(gmail, pass);
 
             JSONObject response = new JSONObject();
-            response.put("type", "login_response");
+            response.put("type", "login");
 
             if (userLogin != null) {
                 response.put("status", "success");
@@ -114,26 +116,31 @@ class ClientHandler extends Thread {
     }
 
     private void handleSignUp(JSONObject request) {
+        JSONObject response = new JSONObject();
+        response.put("type", "signup");
         try {
             User user = new User();
             user.setName(request.getString("name"));
             user.setGmail(request.getString("gmail"));
             user.setPassword(request.getString("password"));
             user.setScore(0);
-            user.setState("offline");
+            user.setState("onlineAvailable");
             int result = DAO.SignUp(user);
-            JSONObject response = new JSONObject();
-            response.put("type", "signUp_response");
+
             if (result > 0) {
 
                 response.put("status", "success");
             } else {
                 response.put("status", "fail");
             }
-            ps.println(response.toString());
-
+        } catch (java.sql.SQLIntegrityConstraintViolationException ex) {
+   
+            response.put("status", "fail");
+            response.put("message", "This Email is already registered!");
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } finally {
+            ps.println(response.toString());
         }
 
     }
@@ -147,14 +154,14 @@ class ClientHandler extends Thread {
             DAO.updateScore(userId, score, operator);
 
             JSONObject response = new JSONObject();
-            response.put("type", "update_score_response");
+            response.put("type", "update_score");
             response.put("status", "success");
 
             ps.println(response.toString());
 
         } catch (SQLException e) {
             JSONObject response = new JSONObject();
-            response.put("type", "update_score_response");
+            response.put("type", "update_score");
             response.put("status", "fail");
             response.put("message", e.getMessage());
 
@@ -176,14 +183,15 @@ class ClientHandler extends Thread {
                 DAO.updateScore(loserId, 5, '-');
             }
             JSONObject response = new JSONObject();
-            response.put("type", "game_result_response");
+
+            response.put("type", "game_result");
             response.put("status", "success");
 
             ps.println(response.toString());
 
         } catch (Exception e) {
             JSONObject response = new JSONObject();
-            response.put("type", "game_result_response");
+            response.put("type", "game_result");
             response.put("status", "fail");
             response.put("message", e.getMessage());
 
@@ -261,7 +269,7 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-    }
+     }
 
     public void closeConnection() {
         try {
@@ -277,11 +285,11 @@ class ClientHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        onTurnoff.clientsVector.remove(this);
+        OnTurnOff.clientsVector.remove(this);
     }
 
     private boolean isPlayerAlreadyLoggedIn(String gmail) {
-        for (ClientHandler client : onTurnoff.clientsVector) {
+        for (ClientHandler client : OnTurnOff.clientsVector) {
             if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
                 return true;
             }
@@ -292,4 +300,26 @@ class ClientHandler extends Thread {
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
+    
+    private void handleLogout(JSONObject request) {
+        try {
+            String gmail = request.getString("gmail");
+
+            DAO.updateState(gmail, "Offline");
+            this.loggedUser = null;
+
+            JSONObject response = new JSONObject();
+            response.put("type", "logout_response");
+            response.put("status", "success");
+
+            ps.println(response.toString());
+
+        } catch (Exception e) {
+            JSONObject response = new JSONObject();
+            response.put("type", "logout_response");
+            response.put("status", "fail");
+            ps.println(response.toString());
+        }
+    }
+
 }
