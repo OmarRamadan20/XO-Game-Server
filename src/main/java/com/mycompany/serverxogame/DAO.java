@@ -27,7 +27,7 @@ public class DAO {
     private static void ensureConnection() throws SQLException {
         if (connect == null || connect.isClosed()) {
             DriverManager.registerDriver(new ClientDriver());
-            connect = DriverManager.getConnection("jdbc:derby://localhost:1527/User", "Team4", "team4");
+            connect = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM4", "Team4", "team4");
         }
     }
 
@@ -157,7 +157,7 @@ public class DAO {
         }
         return availablePlayers;
     }
-
+//response
     public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
         ensureConnection();
         PreparedStatement pr = connect.prepareStatement("INSERT INTO TEAM4.GAME (user1_id, user2_id, winner_id, game_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
