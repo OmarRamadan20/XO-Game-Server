@@ -269,8 +269,7 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        // هذا الجزء سيعمل عندما يكون الإيميل مكرراً
-    }
+     }
 
     public void closeConnection() {
         try {
@@ -286,11 +285,11 @@ class ClientHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        onTurnoff.clientsVector.remove(this);
+        OnTurnOff.clientsVector.remove(this);
     }
 
     private boolean isPlayerAlreadyLoggedIn(String gmail) {
-        for (ClientHandler client : onTurnoff.clientsVector) {
+        for (ClientHandler client : OnTurnOff.clientsVector) {
             if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
                 return true;
             }

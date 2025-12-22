@@ -3,53 +3,55 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
  */
 package com.mycompany.serverxogame;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-
 import javafx.scene.control.Button;
-import javafx.scene.layout.AnchorPane;
-
-/**
- * FXML Controller class
- *
- * @author user
- */
 public class Server_runController implements Initializable {
 
-    private onTurnoff serverTask;
-    private Thread serverThread;
+    private static OnTurnOff server; 
+    private static Thread serverThread;
+
     @FXML
     private Button ServerStateButton;
     @FXML
     private Button PlayerStatusButton;
 
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        ServerStateButton.setText(server == null ? "Start Server" : "Stop Server");
     }
 
     @FXML
     private void runTheServer(ActionEvent event) {
-        if (serverTask == null || !serverThread.isAlive()) {
-            serverTask = new onTurnoff();
-            serverThread = new Thread(serverTask);
+
+        if (server != null) {
+            server.stopServer();
+            server = null;
+            serverThread = null;
+            ServerStateButton.setText("Start Server");
+            System.out.println("Server stopped by user.");
+            return;
+        }
+
+        server = new OnTurnOff();
+        if (server.startServer()) {
+            serverThread = new Thread(server);
+            serverThread.setDaemon(true);
             serverThread.start();
-            System.out.println("Server Started!");
+            ServerStateButton.setText("Stop Server");
+            System.out.println("Server started by user.");
         } else {
-            System.out.println("Server is already running!");
+            server = null;
         }
     }
 
     @FXML
     private void showPlayerStatus(ActionEvent event) {
-        NavigationBetweenScreens.goToPieChart(event);
-    }
+            NavigationBetweenScreens.goToPieChart(event);
 
+    
+    }
 }
