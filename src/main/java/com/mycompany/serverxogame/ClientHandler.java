@@ -61,6 +61,7 @@ class ClientHandler extends Thread {
 
                     case "game_result":
                         handleInsertGameResult(request);
+                        break;
 
                     case "getTopPlayers":
                         handleGetTopPlayer();
@@ -137,7 +138,6 @@ class ClientHandler extends Thread {
 
     }
 
-
     private void handleScore(JSONObject request) {
         try {
             int userId = request.getInt("userId");
@@ -161,33 +161,36 @@ class ClientHandler extends Thread {
             ps.println(response.toString());
         }
     }
-    
+
     private void handleInsertGameResult(JSONObject request) {
-    try {
-        int user1Id = request.getInt("user1_id");
-        int user2Id = request.getInt("user2_id");
-        int winnerId = request.getInt("winner_id");
+        try {
+            int user1Id = request.getInt("user1_id");
+            int user2Id = request.getInt("user2_id");
+            int winnerId = request.getInt("winner_id");
 
-        DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
+            DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
+            if (winnerId != 0) {
+                int loserId = (winnerId == user1Id) ? user2Id : user1Id;
 
-        JSONObject response = new JSONObject();
-        response.put("type", "game_result_response");
-        response.put("status", "success");
+                DAO.updateScore(winnerId, 10, '+');
+                DAO.updateScore(loserId, 5, '-');
+            }
+            JSONObject response = new JSONObject();
+            response.put("type", "game_result_response");
+            response.put("status", "success");
 
-        ps.println(response.toString());
+            ps.println(response.toString());
 
-    } catch (Exception e) {
-        JSONObject response = new JSONObject();
-        response.put("type", "game_result_response");
-        response.put("status", "fail");
-        response.put("message", e.getMessage());
+        } catch (Exception e) {
+            JSONObject response = new JSONObject();
+            response.put("type", "game_result_response");
+            response.put("status", "fail");
+            response.put("message", e.getMessage());
 
-        ps.println(response.toString());
+            ps.println(response.toString());
+        }
     }
-}
 
-    
-   
     private void handleGetTopPlayer() {
         try {
             ArrayList<User> players = DAO.getTopPlayers();
@@ -259,7 +262,6 @@ class ClientHandler extends Thread {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
-
 
     public void closeConnection() {
         try {
