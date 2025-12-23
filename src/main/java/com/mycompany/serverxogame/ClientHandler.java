@@ -75,6 +75,12 @@ class ClientHandler extends Thread {
                     case "logout":
                         handleLogout(request);
                         break;
+                    case "invite":
+                        handleInvite(request);
+                        break;
+                    case "move":
+                        handleMove(request);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -134,7 +140,7 @@ class ClientHandler extends Thread {
                 response.put("status", "fail");
             }
         } catch (java.sql.SQLIntegrityConstraintViolationException ex) {
-   
+
             response.put("status", "fail");
             response.put("message", "This Email is already registered!");
         } catch (SQLException ex) {
@@ -269,7 +275,7 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        // هذا الجزء سيعمل عندما يكون الإيميل مكرراً
+
     }
 
     public void closeConnection() {
@@ -301,7 +307,7 @@ class ClientHandler extends Thread {
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
-    
+
     private void handleLogout(JSONObject request) {
         try {
             String gmail = request.getString("gmail");
@@ -322,5 +328,34 @@ class ClientHandler extends Thread {
             ps.println(response.toString());
         }
     }
+
+    private void handleInvite(JSONObject request) {
+        String toPlayer = request.getString("to");
+        String fromPlayer = request.getString("from");
+        for (ClientHandler client : onTurnoff.clientsVector) {
+            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+                JSONObject msg = new JSONObject();
+                msg.put("type", "invite_recieved");
+                msg.put("from", fromPlayer);
+                client.ps.println(msg.toString());
+                break;
+            }
+        }
+    }
+
+    private void handleMove(JSONObject request) {
+        String specialPlayer = request.getString("to");
+        String move = request.getString("move");
+        for (ClientHandler client : onTurnoff.clientsVector) {
+            if (client.loggedUser != null && client.loggedUser.getName().equals(specialPlayer)) {
+                                JSONObject msg = new JSONObject();
+                msg.put("type", "player_move");
+                msg.put("move", move);
+                client.ps.println(msg.toString());
+                break;
+            }
+        }
+    
+}
 
 }
