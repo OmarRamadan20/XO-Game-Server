@@ -3,69 +3,71 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.serverxogame;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Vector;
-
-
-public class  onTurnoff  implements Runnable {
+public class OnTurnOff implements Runnable {
 
     private ServerSocket serverSocket;
-    private volatile boolean isOn = true;
+    private volatile boolean isOn = false;
     private final int port = 5555;
-    public   static Vector<ClientHandler> clientsVector = new Vector<>();
 
-    public onTurnoff () {
+    public static Vector<ClientHandler> clientsVector = new Vector<>();
+
+    public boolean startServer() {
+        if (isOn) return false;
+
         try {
             serverSocket = new ServerSocket(port);
-             serverSocket.setSoTimeout(1000); 
-        } catch (IOException ex) {
- 
-            ex.printStackTrace();
+            serverSocket.setSoTimeout(1000);
+            isOn = true;
+            System.out.println("Server Started on port " + port);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
     @Override
     public void run() {
-         while (isOn) {
+        while (isOn) {
             try {
                 Socket socket = serverSocket.accept();
-                
                 ClientHandler handler = new ClientHandler(socket);
                 clientsVector.add(handler);
                 handler.start();
-                
-            } catch (SocketTimeoutException e) {
-                continue;
-            } catch (IOException ex) {
-                                 if (isOn) {
-                    ex.printStackTrace();
-                }
-                break;
 
-             }
-            
+            } catch (SocketTimeoutException e) {
+                // ignore
+            } catch (IOException e) {
+                if (isOn) e.printStackTrace();
+                break;
+            }
         }
-        stopServer();
     }
 
-    public void stopServer() {
+    public synchronized void stopServer() {
+        if (!isOn) return;
+
         isOn = false;
         try {
-            if (serverSocket != null && !serverSocket.isClosed()) {
-                serverSocket.close();
-            }
-            // Close all client connections
             for (ClientHandler client : clientsVector) {
                 client.closeConnection();
             }
             clientsVector.clear();
+
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+
             System.out.println("Server stopped.");
-        } catch (IOException ex) {
-                ex.printStackTrace();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
 }
