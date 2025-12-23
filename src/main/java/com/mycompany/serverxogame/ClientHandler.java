@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import org.json.JSONArray;
 
-
 class ClientHandler extends Thread {
 
     private Socket socket;
@@ -82,6 +81,11 @@ class ClientHandler extends Thread {
                     case "move":
                         handleMove(request);
                         break;
+                    case "invite_response":
+                        handleInviteResponse(request);
+                        break;
+
+
                 }
             }
         } catch (Exception e) {
@@ -277,8 +281,7 @@ class ClientHandler extends Thread {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
 
-     }
-
+    }
 
     public void closeConnection() {
         try {
@@ -331,32 +334,53 @@ class ClientHandler extends Thread {
         }
     }
 
-    private void handleInvite(JSONObject request) {
-        String toPlayer = request.getString("to");
-        String fromPlayer = request.getString("from");
-        for (ClientHandler client : OnTurnOff.clientsVector) {
-            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
-                JSONObject msg = new JSONObject();
-                msg.put("type", "invite_recieved");
-                msg.put("from", fromPlayer);
-                client.ps.println(msg.toString());
-                break;
-            }
+// في كلاس ClientHandler في السيرفر
+private void handleInvite(JSONObject request) {
+    String toPlayer = request.getString("to"); // الشخص اللي مبعوتله
+    String fromPlayer = request.getString("from"); // الشخص اللي بيبعت
+    
+    boolean found = false;
+    for (ClientHandler client : OnTurnOff.clientsVector) {
+        // تأكدي أن المقارنة بالاسم صحيحة (Name)
+        if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+            JSONObject msg = new JSONObject();
+            msg.put("type", "invite_recieved");
+            msg.put("from", fromPlayer);
+            client.ps.println(msg.toString()); // إرسال للطرف الآخر
+            found = true;
+            break;
         }
     }
+    if(!found) System.out.println("Target player " + toPlayer + " not found!");
+}
+    private void handleInviteResponse(JSONObject request) {
+    String toPlayer = request.getString("to"); // اللاعب اللي بعت الدعوة أصلاً
+    String status = request.getString("status"); // accept أو later
+    
+    for (ClientHandler client : OnTurnOff.clientsVector) {
+        if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+            JSONObject msg = new JSONObject();
+            msg.put("type", "invite_status_back");
+            msg.put("status", status);
+            msg.put("from", request.getString("from")); // الشخص اللي رد
+            client.ps.println(msg.toString());
+            break;
+        }
+    }
+}
 
     private void handleMove(JSONObject request) {
         String specialPlayer = request.getString("to");
         String move = request.getString("move");
         for (ClientHandler client : OnTurnOff.clientsVector) {
             if (client.loggedUser != null && client.loggedUser.getName().equals(specialPlayer)) {
-                                JSONObject msg = new JSONObject();
+                JSONObject msg = new JSONObject();
                 msg.put("type", "player_move");
                 msg.put("move", move);
                 client.ps.println(msg.toString());
                 break;
             }
         }
-    
+
     }
 }
