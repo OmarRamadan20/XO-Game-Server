@@ -72,6 +72,7 @@ class ClientHandler extends Thread {
                     case "playerHistory":
                         handlePlayerHistory(request);
                         break;
+                        
                     case "logout":
                         handleLogout(request);
                         break;
@@ -183,6 +184,7 @@ class ClientHandler extends Thread {
                 DAO.updateScore(loserId, 5, '-');
             }
             JSONObject response = new JSONObject();
+            response.put("type", "game_result_response");
 
             response.put("type", "game_result");
             response.put("status", "success");
@@ -191,6 +193,7 @@ class ClientHandler extends Thread {
 
         } catch (Exception e) {
             JSONObject response = new JSONObject();
+
             response.put("type", "game_result");
             response.put("status", "fail");
             response.put("message", e.getMessage());
@@ -269,7 +272,7 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-        // هذا الجزء سيعمل عندما يكون الإيميل مكرراً
+
     }
 
     public void closeConnection() {
@@ -301,26 +304,27 @@ class ClientHandler extends Thread {
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
-    
+
     private void handleLogout(JSONObject request) {
+    JSONObject response = new JSONObject();
+    response.put("type", "logout_response");
+
+    if (loggedUser != null) {
         try {
-            String gmail = request.getString("gmail");
-
-            DAO.updateState(gmail, "Offline");
-            this.loggedUser = null;
-
-            JSONObject response = new JSONObject();
-            response.put("type", "logout_response");
-            response.put("status", "success");
-
-            ps.println(response.toString());
-
+            DAO.updateState(loggedUser.getGmail(), "offline");
         } catch (Exception e) {
-            JSONObject response = new JSONObject();
-            response.put("type", "logout_response");
-            response.put("status", "fail");
-            ps.println(response.toString());
+            e.printStackTrace();
         }
+
+        loggedUser = null;
+        response.put("status", "success");
+    } else {
+        response.put("status", "fail");
+        response.put("message", "User not logged in");
     }
+
+    ps.println(response.toString());
+}
+
 
 }
