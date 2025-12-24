@@ -377,17 +377,20 @@ class ClientHandler extends Thread {
     }
 
     private void handleMove(JSONObject request) {
-        String specialPlayer = request.getString("to");
+        String targetPlayerName = request.getString("to");
         String move = request.getString("move");
+        String senderName = request.getString("from");
+
         for (ClientHandler client : OnTurnOff.clientsVector) {
-            if (client.loggedUser != null && client.loggedUser.getName().equals(specialPlayer)) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(targetPlayerName)) {
                 JSONObject msg = new JSONObject();
                 msg.put("type", "player_move");
                 msg.put("move", move);
+                msg.put("from", senderName);
                 client.ps.println(msg.toString());
                 break;
             }
         }
-
     }
 }
