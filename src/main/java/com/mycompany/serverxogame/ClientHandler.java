@@ -72,7 +72,7 @@ class ClientHandler extends Thread {
                     case "playerHistory":
                         handlePlayerHistory(request);
                         break;
-                        
+
                     case "logout":
                         handleLogout(request);
                         break;
@@ -85,7 +85,6 @@ class ClientHandler extends Thread {
                     case "invite_response":
                         handleInviteResponse(request);
                         break;
-
 
                 }
             }
@@ -317,61 +316,65 @@ class ClientHandler extends Thread {
     }
 
     private void handleLogout(JSONObject request) {
-    JSONObject response = new JSONObject();
-    response.put("type", "logout_response");
+        JSONObject response = new JSONObject();
+        response.put("type", "logout_response");
 
-    if (loggedUser != null) {
-        try {
-            DAO.updateState(loggedUser.getGmail(), "offline");
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (loggedUser != null) {
+            try {
+                DAO.updateState(loggedUser.getGmail(), "offline");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            loggedUser = null;
+            response.put("status", "success");
+        } else {
+            response.put("status", "fail");
+            response.put("message", "User not logged in");
         }
 
-        loggedUser = null;
-        response.put("status", "success");
-    } else {
-        response.put("status", "fail");
-        response.put("message", "User not logged in");
+        ps.println(response.toString());
     }
-
-    ps.println(response.toString());
-}
-
 
 // في كلاس ClientHandler في السيرفر
-private void handleInvite(JSONObject request) {
-    String toPlayer = request.getString("to"); // الشخص اللي مبعوتله
-    String fromPlayer = request.getString("from"); // الشخص اللي بيبعت
-    
-    boolean found = false;
-    for (ClientHandler client : OnTurnOff.clientsVector) {
-        // تأكدي أن المقارنة بالاسم صحيحة (Name)
-        if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
-            JSONObject msg = new JSONObject();
-            msg.put("type", "invite_recieved");
-            msg.put("from", fromPlayer);
-            client.ps.println(msg.toString()); // إرسال للطرف الآخر
-            found = true;
-            break;
+    private void handleInvite(JSONObject request) {
+        String toPlayer = request.getString("to");
+        String fromPlayer = request.getString("from");
+
+        boolean found = false;
+        for (ClientHandler client : OnTurnOff.clientsVector) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+                JSONObject msg = new JSONObject();
+                msg.put("type", "invite_recieved");
+                msg.put("from", fromPlayer);
+                client.ps.println(msg.toString());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Target player " + toPlayer + " not found!");
         }
     }
-    if(!found) System.out.println("Target player " + toPlayer + " not found!");
-}
+
     private void handleInviteResponse(JSONObject request) {
-    String toPlayer = request.getString("to"); // اللاعب اللي بعت الدعوة أصلاً
-    String status = request.getString("status"); // accept أو later
-    
-    for (ClientHandler client : OnTurnOff.clientsVector) {
-        if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
-            JSONObject msg = new JSONObject();
-            msg.put("type", "invite_status_back");
-            msg.put("status", status);
-            msg.put("from", request.getString("from")); // الشخص اللي رد
-            client.ps.println(msg.toString());
-            break;
+        String toPlayer = request.getString("to");
+        String status = request.getString("status");
+        String fromPlayer = request.getString("from");
+
+        for (ClientHandler client : OnTurnOff.clientsVector) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+                JSONObject response = new JSONObject();
+                response.put("type", "invite_status_back");
+                response.put("status", status);
+                response.put("from", fromPlayer);
+                client.ps.println(response.toString());
+                break;
+            }
         }
     }
-}
 
     private void handleMove(JSONObject request) {
         String specialPlayer = request.getString("to");
