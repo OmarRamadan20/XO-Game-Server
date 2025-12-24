@@ -72,9 +72,20 @@ class ClientHandler extends Thread {
                     case "playerHistory":
                         handlePlayerHistory(request);
                         break;
+
                     case "logout":
                         handleLogout(request);
                         break;
+                    case "invite":
+                        handleInvite(request);
+                        break;
+                    case "move":
+                        handleMove(request);
+                        break;
+                    case "invite_response":
+                        handleInviteResponse(request);
+                        break;
+
                 }
             }
         } catch (Exception e) {
@@ -134,7 +145,7 @@ class ClientHandler extends Thread {
                 response.put("status", "fail");
             }
         } catch (java.sql.SQLIntegrityConstraintViolationException ex) {
-   
+
             response.put("status", "fail");
             response.put("message", "This Email is already registered!");
         } catch (SQLException ex) {
@@ -183,6 +194,7 @@ class ClientHandler extends Thread {
                 DAO.updateScore(loserId, 5, '-');
             }
             JSONObject response = new JSONObject();
+            response.put("type", "game_result_response");
 
             response.put("type", "game_result");
             response.put("status", "success");
@@ -191,6 +203,7 @@ class ClientHandler extends Thread {
 
         } catch (Exception e) {
             JSONObject response = new JSONObject();
+
             response.put("type", "game_result");
             response.put("status", "fail");
             response.put("message", e.getMessage());
@@ -269,7 +282,8 @@ class ClientHandler extends Thread {
         } catch (SQLException ex) {
             System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
-     }
+
+    }
 
     public void closeConnection() {
         try {
@@ -300,26 +314,83 @@ class ClientHandler extends Thread {
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
     }
-    
+
     private void handleLogout(JSONObject request) {
-        try {
-            String gmail = request.getString("gmail");
+        JSONObject response = new JSONObject();
+        response.put("type", "logout_response");
 
-            DAO.updateState(gmail, "Offline");
-            this.loggedUser = null;
+        if (loggedUser != null) {
+            try {
+                DAO.updateState(loggedUser.getGmail(), "offline");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            JSONObject response = new JSONObject();
-            response.put("type", "logout_response");
+            loggedUser = null;
             response.put("status", "success");
-
-            ps.println(response.toString());
-
-        } catch (Exception e) {
-            JSONObject response = new JSONObject();
-            response.put("type", "logout_response");
+        } else {
             response.put("status", "fail");
-            ps.println(response.toString());
+            response.put("message", "User not logged in");
+        }
+
+        ps.println(response.toString());
+    }
+
+// في كلاس ClientHandler في السيرفر
+    private void handleInvite(JSONObject request) {
+        String toPlayer = request.getString("to");
+        String fromPlayer = request.getString("from");
+
+        boolean found = false;
+        for (ClientHandler client : OnTurnOff.clientsVector) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+                JSONObject msg = new JSONObject();
+                msg.put("type", "invite_recieved");
+                msg.put("from", fromPlayer);
+                client.ps.println(msg.toString());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Target player " + toPlayer + " not found!");
         }
     }
 
+    private void handleInviteResponse(JSONObject request) {
+        String toPlayer = request.getString("to");
+        String status = request.getString("status");
+        String fromPlayer = request.getString("from");
+
+        for (ClientHandler client : OnTurnOff.clientsVector) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(toPlayer)) {
+                JSONObject response = new JSONObject();
+                response.put("type", "invite_status_back");
+                response.put("status", status);
+                response.put("from", fromPlayer);
+                client.ps.println(response.toString());
+                break;
+            }
+        }
+    }
+
+    private void handleMove(JSONObject request) {
+        String targetPlayerName = request.getString("to");
+        String move = request.getString("move");
+        String senderName = request.getString("from");
+
+        for (ClientHandler client : OnTurnOff.clientsVector) {
+
+            if (client.loggedUser != null && client.loggedUser.getName().equals(targetPlayerName)) {
+                JSONObject msg = new JSONObject();
+                msg.put("type", "player_move");
+                msg.put("move", move);
+                msg.put("from", senderName);
+                client.ps.println(msg.toString());
+                break;
+            }
+        }
+    }
 }
