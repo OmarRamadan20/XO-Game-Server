@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
@@ -29,7 +30,7 @@ public class PrimaryController implements Initializable {
         loadPieChart();
     }
 
-    
+   
     private void loadPieChart() {
         try {
             int[] counts = DAO.getPlayersStateCounts();
@@ -65,9 +66,11 @@ public class PrimaryController implements Initializable {
             ));
 
             Platform.runLater(() -> {
-                slice1.getNode().setStyle("-fx-pie-color: #FF6347;");
-                slice2.getNode().setStyle("-fx-pie-color: #90EE90;");
-                slice3.getNode().setStyle("-fx-pie-color: #1E90FF;");
+
+                
+                applyColor(slice1, "#FF6347"); // OnGame
+                applyColor(slice2, "#90EE90"); // Available
+                applyColor(slice3, "#1E90FF"); // Offline
 
                 PieChart.Data[] slices = {slice1, slice2, slice3};
 
@@ -89,6 +92,26 @@ public class PrimaryController implements Initializable {
         }
     }
 
+   
+    private void applyColor(PieChart.Data data, String color) {
+
+       
+        if (data.getNode() != null) {
+            data.getNode().setStyle("-fx-pie-color: " + color + ";");
+        }
+
+      
+        for (Node item : pieChart.lookupAll(".chart-legend-item")) {
+            if (item.toString().contains(data.getName())) {
+                Node symbol = item.lookup(".chart-legend-item-symbol");
+                if (symbol != null) {
+                    symbol.setStyle("-fx-background-color: " + color + ";");
+                }
+            }
+        }
+    }
+
+   
     @FXML
     private void onActionBack(ActionEvent event) {
         NavigationBetweenScreens.backToServer(event);
