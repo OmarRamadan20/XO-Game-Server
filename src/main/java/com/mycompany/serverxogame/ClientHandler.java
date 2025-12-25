@@ -58,11 +58,11 @@ class ClientHandler extends Thread {
                     case "update_score":
                         handleScore(request);
                         break;
-
+ 
                     case "game_result":
                         handleInsertGameResult(request);
                         break;
-
+ 
                     case "getTopPlayers":
                         handleGetTopPlayer();
                         break;
@@ -85,7 +85,12 @@ class ClientHandler extends Thread {
                     case "invite_response":
                         handleInviteResponse(request);
                         break;
-
+                    case "isPlayerAlreadyLoggedIn":
+                        isPlayerAlreadyLoggedIn(request);
+                        break;
+                    case "getscore":
+                        handleGetScore(request);
+         
                 }
             }
         } catch (Exception e) {
@@ -95,6 +100,29 @@ class ClientHandler extends Thread {
         }
     }
 
+  public void handleGetScore(JSONObject request) {
+    JSONObject response = new JSONObject();
+    String gmail = request.optString("gmail", "unknown");  
+
+    try {
+        int score = DAO.getScore(gmail);
+
+        response.put("type", "getScore_response");
+        response.put("status", "success");
+        response.put("score", score);
+        response.put("gmail", gmail);  
+
+    } catch (SQLException e) {
+        response.put("type", "getScore_response");
+        response.put("status", "error");
+        response.put("message", "Database error");
+        response.put("gmail", gmail); 
+    }
+
+    ps.println(response.toString());
+}
+
+    
     private void handleLogin(JSONObject request) {
         String gmail = request.getString("gmail");
         String pass = request.getString("password");
@@ -158,11 +186,11 @@ class ClientHandler extends Thread {
 
     private void handleScore(JSONObject request) {
         try {
-            int userId = request.getInt("userId");
+            String gmail = request.getString("gmail");
             int score = request.getInt("score");
             char operator = request.getString("operator").charAt(0);
 
-            DAO.updateScore(userId, score, operator);
+            DAO.updateScore(gmail, score, operator);
 
             JSONObject response = new JSONObject();
             response.put("type", "update_score");
@@ -180,37 +208,41 @@ class ClientHandler extends Thread {
         }
     }
 
-    private void handleInsertGameResult(JSONObject request) {
-        try {
-            int user1Id = request.getInt("user1_id");
-            int user2Id = request.getInt("user2_id");
-            int winnerId = request.getInt("winner_id");
+private void handleInsertGameResult(JSONObject request) {
+    try {
+        String user1Gmail = request.getString("gmail1");
+        String user2Gmail = request.getString("gmail2");
+        String winGmail = request.getString("gmailWin");
 
-            DAO.InsertGameResult(user1Id, user2Id, winnerId, null);
-            if (winnerId != 0) {
-                int loserId = (winnerId == user1Id) ? user2Id : user1Id;
+         DAO.insertGameResult(user1Gmail, user2Gmail, winGmail);
 
-                DAO.updateScore(winnerId, 10, '+');
-                DAO.updateScore(loserId, 5, '-');
-            }
-            JSONObject response = new JSONObject();
-            response.put("type", "game_result_response");
+         if (winGmail != null && !winGmail.isEmpty()) {
+            String loserGmail = winGmail.equals(user1Gmail) ? user2Gmail : user1Gmail;
+            
+         
+            DAO.updateScore(winGmail, 10, '+');    
+             
+          int scoreCheck =  DAO.getScore(loserGmail);
+               if(scoreCheck > 0)   DAO.updateScore(loserGmail, 5, '-');   
+                
+         
+         }
 
-            response.put("type", "game_result");
-            response.put("status", "success");
+        JSONObject response = new JSONObject();
+        response.put("type", "game_result");
+        response.put("status", "success");
 
-            ps.println(response.toString());
+        ps.println(response.toString());
 
-        } catch (Exception e) {
-            JSONObject response = new JSONObject();
+    } catch (Exception e) {
+        JSONObject response = new JSONObject();
+        response.put("type", "game_result");
+        response.put("status", "fail");
+        response.put("message", e.getMessage());
 
-            response.put("type", "game_result");
-            response.put("status", "fail");
-            response.put("message", e.getMessage());
-
-            ps.println(response.toString());
-        }
+        ps.println(response.toString());
     }
+}
 
     private void handleGetTopPlayer() {
         try {
@@ -260,30 +292,33 @@ class ClientHandler extends Thread {
 
     }
 
-    private void handlePlayerHistory(JSONObject request) {
-        try {
-            String gmail = request.getString("gmail");
-            ArrayList<Game> games = DAO.getPlayerHistory(gmail);
-            JSONObject response = new JSONObject();
-            response.put("type", "playerHistory");
-            JSONArray arrPlayerHistory = new JSONArray();
-            for (Game game : games) {
-                JSONObject obj = new JSONObject();
-                obj.put("user1", game.getUser1Id());
-                obj.put("user2", game.getUser1Id());
-                obj.put("winner", game.getWinnerId());
-                obj.put("date", game.getGameDate().toString());
-                arrPlayerHistory.put(obj);
+   private void handlePlayerHistory(JSONObject request) {
+    try {
+        String gmail = request.getString("gmail");   
+        ArrayList<Game> games = DAO.getPlayerHistory(gmail);
 
-            }
-            response.put("games", arrPlayerHistory);
-            ps.println(response.toString());
+        JSONObject response = new JSONObject();
+        response.put("type", "playerHistory");
 
-        } catch (SQLException ex) {
-            System.getLogger(ClientHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        JSONArray arrPlayerHistory = new JSONArray();
+        for (Game game : games) {
+            JSONObject obj = new JSONObject();
+            obj.put("gmail1", game.getGmail1());     
+            obj.put("gmail2", game.getGmail2());      
+            obj.put("gmailwinner", game.getGmailWin());
+            obj.put("date", game.getGameDate().toString());
+            arrPlayerHistory.put(obj);
         }
 
+        response.put("games", arrPlayerHistory);
+        ps.println(response.toString());
+
+    } catch (SQLException ex) {
+        System.getLogger(ClientHandler.class.getName())
+              .log(System.Logger.Level.ERROR, (String) null, ex);
     }
+}
+
 
     public void closeConnection() {
         try {
@@ -302,14 +337,31 @@ class ClientHandler extends Thread {
         OnTurnOff.clientsVector.remove(this);
     }
 
-    private boolean isPlayerAlreadyLoggedIn(String gmail) {
-        for (ClientHandler client : OnTurnOff.clientsVector) {
-            if (client.loggedUser != null && client.loggedUser.getGmail().equals(gmail)) {
-                return true;
-            }
+private void isPlayerAlreadyLoggedIn(JSONObject request) {
+    JSONObject response = new JSONObject();
+    response.put("type", "isPlayerAlreadyLoggedIn");
+
+    try {
+        String gmail = request.optString("gmail", null);
+
+        if (gmail == null || gmail.isEmpty()) {
+            response.put("status", "error");
+            response.put("message", "gmail is missing");
+        } else {
+            boolean isLogged = DAO.isPlayerAlreadyLoggedIn(gmail);
+            response.put("status", "success");
+            response.put("isLogin", isLogged);
         }
-        return false;
+
+    } catch (SQLException ex) {
+        response.put("status", "error");
+        response.put("message", "database error");
+        ex.printStackTrace();
     }
+
+    ps.println(response.toString());
+}
+
 
     public static void updateState(String email, String status) throws SQLException {
         DAO.updateState(email, status);
@@ -336,8 +388,7 @@ class ClientHandler extends Thread {
         ps.println(response.toString());
     }
 
-// في كلاس ClientHandler في السيرفر
-    private void handleInvite(JSONObject request) {
+     private void handleInvite(JSONObject request) {
         String toPlayer = request.getString("to");
         String fromPlayer = request.getString("from");
 

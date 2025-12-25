@@ -30,7 +30,7 @@ public class DAO {
             connect = DriverManager.getConnection("jdbc:derby://localhost:1527/TEAM4", "Team4", "team4");
         }
     }
-    
+
     public static int SignUp(User user) throws SQLException {
         ensureConnection();
         PreparedStatement pst = connect.prepareStatement("INSERT INTO TEAM4.USERS (name, gmail, password, score, state) VALUES (?, ?, ?, ?, ?)");
@@ -68,64 +68,83 @@ public class DAO {
 
     }
 
-   public static void updateState(String email, String status) throws SQLException {
-    ensureConnection();
-    PreparedStatement ps = connect.prepareStatement(
-        "UPDATE TEAM4.USERS SET state=? WHERE gmail=?"
-    );
-    ps.setString(1, status); 
-    ps.setString(2, email);   
-    ps.executeUpdate();
-}
+    public static void updateState(String email, String status) throws SQLException {
+        ensureConnection();
+        PreparedStatement ps = connect.prepareStatement(
+                "UPDATE TEAM4.USERS SET state=? WHERE gmail=?"
+        );
+        ps.setString(1, status);
+        ps.setString(2, email);
+        ps.executeUpdate();
+    }
 
+    public static int getScore(String gmail) throws SQLException {
+        ensureConnection();
+
+        PreparedStatement ps = connect.prepareStatement(
+                "SELECT score FROM TEAM4.USERS WHERE gmail = ?"
+        );
+
+        ps.setString(1, gmail);
+
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("score");
+        }
+
+        return 0;
+    }
 
     public static boolean isPlayerAlreadyLoggedIn(String gmail) throws SQLException {
         ensureConnection();
-        PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail = ? AND state = 'Online' ");
+        PreparedStatement ps = connect.prepareStatement("SELECT * FROM TEAM4.USERS WHERE gmail = ? AND state = 'onlineGame' ");
         ps.setString(1, gmail);
         ResultSet rs = ps.executeQuery();
         return rs.next();
 
     }
 
-   public static int[] getPlayersStateCounts() throws SQLException {
-    ensureConnection();
-    int[] counts = new int[3]; 
-    
-    PreparedStatement ps = connect.prepareStatement(
-        "SELECT state, COUNT(*) as cnt FROM TEAM4.USERS GROUP BY state"
-    );
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-        String state = rs.getString("state");
-        int cnt = rs.getInt("cnt");
-       switch (state) {
-    case "onlineGame":
-        counts[0] = cnt;
-        break;
-    case "onlineAvailable":
-        counts[1] = cnt;
-        break;
-    case "Offline":
-        counts[2] = cnt;
-        break;
-}
+    public static int[] getPlayersStateCounts() throws SQLException {
+        ensureConnection();
+        int[] counts = new int[3];
+
+        PreparedStatement ps = connect.prepareStatement(
+                "SELECT state, COUNT(*) as cnt FROM TEAM4.USERS GROUP BY state"
+        );
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            String state = rs.getString("state");
+            int cnt = rs.getInt("cnt");
+            switch (state) {
+                case "onlineGame":
+                    counts[0] = cnt;
+                    break;
+                case "onlineAvailable":
+                    counts[1] = cnt;
+                    break;
+                case "Offline":
+                    counts[2] = cnt;
+                    break;
+            }
+        }
+        return counts;
     }
-    return counts;
-}
 
-
-
-    public static void updateScore(int userId, int score,char operator) throws SQLException {
+    public static void updateScore(String gmail, int score, char operator) throws SQLException {
         ensureConnection();
         PreparedStatement ps = connect.prepareStatement(
-       "UPDATE TEAM4.USERS SET score = score " + operator + " ? WHERE id = ?"
+                "UPDATE TEAM4.USERS SET score = score " + operator + " ? WHERE gmail = ?"
         );
+        if(score>0)
         ps.setInt(1, score);
-        ps.setInt(2, userId);
-        ps.executeUpdate();   
+        else 
+         ps.setInt(1, 0);   
+        
+        ps.setString(2, gmail);
+        ps.executeUpdate();
     }
-   
+
     public static ArrayList<User> getTopPlayers() throws SQLException {
         ensureConnection();
         ArrayList<User> topPlayers = new ArrayList<>();
@@ -161,52 +180,49 @@ public class DAO {
         }
         return availablePlayers;
     }
-     public static void InsertGameResult(int user1_id, int user2_id, int winner_id, Date game_date) throws SQLException {
+
+    public static void insertGameResult(String gmail1, String gmail2, String winner_gmail) throws SQLException {
         ensureConnection();
-        PreparedStatement pr = connect.prepareStatement("INSERT INTO TEAM4.GAME (user1_id, user2_id, winner_id, game_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
-        pr.setInt(1, user1_id);
-        pr.setInt(2, user2_id);
-        pr.setInt(3, winner_id);
+
+        String sql = "INSERT INTO TEAM4.GAMES (GMAIL1, GMAIL2, GMAILWIN, GAMEDATE) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+
+        PreparedStatement pr = connect.prepareStatement(sql);
+        pr.setString(1, gmail1);
+        pr.setString(2, gmail2);
+        pr.setString(3, winner_gmail);
+
         pr.executeUpdate();
+        pr.close();
     }
 
     public static ArrayList<Game> getPlayerHistory(String email) throws SQLException {
         ensureConnection();
         ArrayList<Game> games = new ArrayList<>();
 
-        PreparedStatement psUser = connect.prepareStatement(
-                "SELECT id FROM TEAM4.USERS WHERE gmail = ?"
-        );
-        psUser.setString(1, email);
-        ResultSet rsUser = psUser.executeQuery();
-
-        if (!rsUser.next()) {
-            return games;
-        }
-
-        int userId = rsUser.getInt("id");
-
-        PreparedStatement psGames = connect.prepareStatement(
-                "SELECT * FROM TEAM4.GAME WHERE user1_id = ? OR user2_id = ? ORDER BY game_date DESC"
-        );
-        psGames.setInt(1, userId);
-        psGames.setInt(2, userId);
+        String sql = "SELECT * FROM TEAM4.GAMES WHERE GMAIL1 = ? OR GMAIL2 = ? ORDER BY GAMEDATE DESC";
+        PreparedStatement psGames = connect.prepareStatement(sql);
+        psGames.setString(1, email);
+        psGames.setString(2, email);
 
         ResultSet rsGames = psGames.executeQuery();
 
         while (rsGames.next()) {
-            Game game = new Game();
-            game.setUser1Id(rsGames.getInt("user1_id"));
-            game.setUser2Id(rsGames.getInt("user2_id"));
-            game.setWinnerId(rsGames.getInt("winner_id"));
-            game.setGameDate(rsGames.getDate("game_date"));
+            Game game = new Game(
+                    rsGames.getInt("GAMEID"),
+                    rsGames.getString("GMAIL1"),
+                    rsGames.getString("GMAIL2"),
+                    rsGames.getString("GMAILWIN"),
+                    rsGames.getTimestamp("GAMEDATE")
+            );
 
             games.add(game);
         }
 
+        rsGames.close();
+        psGames.close();
+
         return games;
     }
-
-    
 
 }

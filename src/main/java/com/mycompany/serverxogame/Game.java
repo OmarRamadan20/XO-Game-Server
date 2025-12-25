@@ -5,72 +5,65 @@
 package com.mycompany.serverxogame;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
  * @author amr04
  */
 public class Game {
-
     private int gameId;
-    private int user1Id;
-    private int user2Id;
-    private int winnerId;
-    private Date gameDate;
+    private String gmail1;
+    private String gmail2;
+    private String gmailWin;
+    private Timestamp gameDate;
 
-    public Game() {
-    }
-
-    public Game(int gameId, int user1Id, int user2Id, int winnerId, Date gameDate) {
+    public Game(int gameId, String gmail1, String gmail2, String gmailWin, Timestamp gameDate) {
         this.gameId = gameId;
-        this.user1Id = user1Id;
-        this.user2Id = user2Id;
-        this.winnerId = winnerId;
+        this.gmail1 = gmail1;
+        this.gmail2 = gmail2;
+        this.gmailWin = gmailWin;
         this.gameDate = gameDate;
     }
 
     public int getGameId() {
         return gameId;
     }
+ 
 
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
+    public String getGmail1() {
+        return gmail1;
     }
 
-    public int getUser1Id() {
-        return user1Id;
+    public void setGmail1(String gmail1) {
+        this.gmail1 = gmail1;
     }
 
-    public void setUser1Id(int user1Id) {
-        this.user1Id = user1Id;
+    public String getGmail2() {
+        return gmail2;
     }
 
-    public int getUser2Id() {
-        return user2Id;
+    public void setGmail2(String gmail2) {
+        this.gmail2 = gmail2;
     }
 
-    public void setUser2Id(int user2Id) {
-        this.user2Id = user2Id;
+    public String getGmailWin() {
+        return gmailWin;
     }
 
-    public int getWinnerId() {
-        return winnerId;
+    public void setGmailWin(String gmailWin) {
+        this.gmailWin = gmailWin;
     }
 
-    public void setWinnerId(int winnerId) {
-        this.winnerId = winnerId;
-    }
-
-    public Date getGameDate() {
+    public Timestamp getGameDate() {
         return gameDate;
     }
 
-    public void setGameDate(Date gameDate) {
+    public void setGameDate(Timestamp gameDate) {
         this.gameDate = gameDate;
     }
-    
-    
-
    
-
 }
+
+  
+ 
