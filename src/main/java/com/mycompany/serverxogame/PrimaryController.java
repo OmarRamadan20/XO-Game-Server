@@ -19,6 +19,8 @@ public class PrimaryController implements Initializable {
     private PieChart pieChart;
     @FXML
     private Button btnBack;
+    @FXML
+    private Button btnRefresh;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -77,6 +79,10 @@ public class PrimaryController implements Initializable {
     @FXML
     private void onActionBack(ActionEvent event) {
         NavigationBetweenScreens.backToServer(event);
+    }
+
+    @FXML
+    private void onActionRefresh(ActionEvent event) {
     }
 
 }
