@@ -2,13 +2,14 @@ package com.mycompany.serverxogame;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
@@ -17,57 +18,73 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private PieChart pieChart;
+
     @FXML
     private Button btnBack;
 
+    @FXML
+    private Button btnRefresh;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        setupChartUI();
+        loadPieChart();
+    }
+
+    private void setupChartUI() {
+
+        pieChart.setLabelsVisible(false);
+
+        pieChart.setLegendSide(Side.BOTTOM);
+
+        pieChart.setAnimated(true);
+    }
+
+    private void loadPieChart() {
         try {
             int[] counts = DAO.getPlayersStateCounts();
-            System.out.println(Arrays.toString(counts));
-
             boolean allZero = counts[0] == 0 && counts[1] == 0 && counts[2] == 0;
 
-            PieChart.Data slice1;
-            PieChart.Data slice2;
-            PieChart.Data slice3;
+            PieChart.Data slice1, slice2, slice3;
+            ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
 
-            if (allZero) {
-
-                slice1 = new PieChart.Data("OnGame Players (0)", 1);
-                slice2 = new PieChart.Data("Available Players (0)", 1);
-                slice3 = new PieChart.Data("Offline Players (0)", 1);
-            } else {
-                slice1 = new PieChart.Data("OnGame Players (" + counts[0] + ")", counts[0] == 0 ? 0.0001 : counts[0]);
-                slice2 = new PieChart.Data("Available Players (" + counts[1] + ")", counts[1] == 0 ? 0.0001 : counts[1]);
-                slice3 = new PieChart.Data("Offline Players (" + counts[2] + ")", counts[2] == 0 ? 0.0001 : counts[2]);
+            if (counts[0] > 0) {
+                pieChartData.add(new PieChart.Data("OnGame ", counts[0]));
+            }
+            if (counts[1] > 0) {
+                pieChartData.add(new PieChart.Data("Available ", counts[1]));
+            }
+            if (counts[2] > 0) {
+                pieChartData.add(new PieChart.Data("Offline ", counts[2]));
             }
 
-            pieChart.setData(FXCollections.observableArrayList(slice1, slice2, slice3));
+            if (pieChartData.isEmpty()) {
+                PieChart.Data noData = new PieChart.Data("No Players", 1);
+                pieChartData.add(noData);
+                pieChart.setData(pieChartData);
+                noData.getNode().setStyle("-fx-pie-color: #bdc3c7;");
+                
+            } else {
+                pieChart.setData(pieChartData);
+            }
 
-            Platform.runLater(() -> {
-                slice1.getNode().setStyle("-fx-pie-color: #FF6347;");
-                slice2.getNode().setStyle("-fx-pie-color: #90EE90;");
-                slice3.getNode().setStyle("-fx-pie-color: #1E90FF;");
+            for (PieChart.Data data : pieChart.getData()) {
+                Node node = data.getNode();
 
-                int[] realValues = counts;
-                PieChart.Data[] slices = {slice1, slice2, slice3};
+                Tooltip.install(node, new Tooltip(data.getName() + ": " + (int) data.getPieValue()));
+                node.setOnMouseEntered(e -> {
+                    node.setScaleX(1.1); // 
+                    node.setScaleY(1.1);
+                    node.setEffect(new javafx.scene.effect.DropShadow(15, javafx.scene.paint.Color.BLACK));
+                    node.toFront();
+                });
 
-                for (int i = 0; i < slices.length; i++) {
-                    PieChart.Data data = slices[i];
-                    if (data.getNode() == null) {
-                        continue;
-                    }
-
-                    Tooltip tooltip = new Tooltip(
-                            data.getName().replaceAll("\\(.*\\)", "") + ": " + realValues[i]
-                    );
-                    Tooltip.install(data.getNode(), tooltip);
-
-                    data.getNode().setOnMouseEntered(e -> data.getNode().setScaleX(1.1));
-                    data.getNode().setOnMouseExited(e -> data.getNode().setScaleX(1.0));
-                }
-            });
+                node.setOnMouseExited(e -> {
+                    node.setScaleX(1.0);
+                    node.setScaleY(1.0);
+                    node.setEffect(null);
+                });
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -79,4 +96,8 @@ public class PrimaryController implements Initializable {
         NavigationBetweenScreens.backToServer(event);
     }
 
+    @FXML
+    private void onActionRefresh(ActionEvent event) {
+        loadPieChart();
+    }
 }

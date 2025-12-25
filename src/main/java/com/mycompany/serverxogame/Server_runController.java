@@ -54,4 +54,9 @@ public class Server_runController implements Initializable {
 
     
     }
+    
+    public static OnTurnOff getServer() {
+    return server;
+}
+
 }
