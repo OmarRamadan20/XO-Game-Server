@@ -223,7 +223,7 @@ private void handleInsertGameResult(JSONObject request) {
             DAO.updateScore(winGmail, 10, '+');    
              
           int scoreCheck =  DAO.getScore(loserGmail);
-               if(scoreCheck > 0)   DAO.updateScore(loserGmail, 5, '-');   
+               if(scoreCheck < 0)   DAO.updateScore(loserGmail, 5, '-');   
                 
          
          }
