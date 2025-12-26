@@ -123,7 +123,7 @@ public class DAO {
                 case "onlineAvailable":
                     counts[1] = cnt;
                     break;
-                case "Offline":
+                case "offline":
                     counts[2] = cnt;
                     break;
             }

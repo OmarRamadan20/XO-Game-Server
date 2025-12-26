@@ -44,7 +44,7 @@ public class PrimaryController implements Initializable {
         try {
             int[] counts = DAO.getPlayersStateCounts();
             boolean allZero = counts[0] == 0 && counts[1] == 0 && counts[2] == 0;
-
+        
             PieChart.Data slice1, slice2, slice3;
             ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
 
@@ -68,10 +68,12 @@ public class PrimaryController implements Initializable {
                 pieChart.setData(pieChartData);
             }
 
+              if(!allZero)
+               {
             for (PieChart.Data data : pieChart.getData()) {
                 Node node = data.getNode();
-
-                Tooltip.install(node, new Tooltip(data.getName() + ": " + (int) data.getPieValue()));
+             
+                   Tooltip.install(node, new Tooltip(data.getName() + ": " + (int) data.getPieValue()));
                 node.setOnMouseEntered(e -> {
                     node.setScaleX(1.1); // 
                     node.setScaleY(1.1);
@@ -84,7 +86,8 @@ public class PrimaryController implements Initializable {
                     node.setScaleY(1.0);
                     node.setEffect(null);
                 });
-            }
+               }
+               }
 
         } catch (SQLException e) {
             e.printStackTrace();
