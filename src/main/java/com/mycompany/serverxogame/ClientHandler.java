@@ -227,6 +227,8 @@ private void handleInsertGameResult(JSONObject request) {
                 
          
          }
+         DAO.updateState(user1Gmail, "onlineAvailable");
+        DAO.updateState(user2Gmail, "onlineAvailable");
 
         JSONObject response = new JSONObject();
         response.put("type", "game_result");
@@ -412,7 +414,8 @@ private void isPlayerAlreadyLoggedIn(JSONObject request) {
     private void handleInviteResponse(JSONObject request) {
         String toPlayer = request.getString("to");
         String status = request.getString("status");
-        String fromPlayer = request.getString("from");
+        String fromPlayerName = request.getString("from");
+        String fromEmail = request.getString("fromEmail");
 
         for (ClientHandler client : OnTurnOff.clientsVector) {
 
@@ -420,9 +423,19 @@ private void isPlayerAlreadyLoggedIn(JSONObject request) {
                 JSONObject response = new JSONObject();
                 response.put("type", "invite_status_back");
                 response.put("status", status);
-                response.put("from", fromPlayer);
+                response.put("from", fromPlayerName);
                 client.ps.println(response.toString());
-                break;
+                if ("accept".equals(status)) {
+                try {
+                   
+                    updateState(client.loggedUser.getGmail(), "onlineGame"); 
+                    updateState(fromEmail, "onlineGame");
+                    
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            break;
             }
         }
     }
