@@ -42,12 +42,9 @@ This project was developed as part of a **team final project**, with a focus on 
 - Maven
 - IDE (IntelliJ IDEA or NetBeans recommended)
 
-👩‍💻 Team Members:
+## 👩‍💻 Team Members
+- Ahlam Gomaa Snosy
+- Mahmoud Mohamed Abdullah
+- Omar Ramadan
+- Amr Abdulrahim Tayea
 
-Ahlam Gomaa Snosy
-
-Omar Ramadan
-
-Amr Abdulrahim Tayea
-
-Mahmoud Mahammed
